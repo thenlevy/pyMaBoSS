@@ -5,10 +5,11 @@ from sys import stderr
 import pyparsing as pp
 
 boolExp = pp.Forward()
-varName = pp.Word(pp.alphas, pp.alphanums+'_')
-boolCst = pp.oneOf("_True _False")
+boolCst = pp.oneOf("True False")
 boolNot = pp.oneOf("! NOT")
 boolBinOp = pp.oneOf("&& & AND || | OR ^ XOR")
+varName = (~boolCst + ~boolNot + ~boolBinOp
+           + pp.Word(pp.alphas, pp.alphanums+'_'))
 lparen = pp.Suppress('(')
 rparen = pp.Suppress(')')
 boolExp << (boolCst | varName | (boolNot + boolExp) | (lparen + boolExp

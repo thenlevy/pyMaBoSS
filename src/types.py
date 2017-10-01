@@ -34,7 +34,7 @@ class Node:
             if not logic._check_logic_syntax(logExp):
                 print("Waring, syntax error: %s" % logExp, file=stderr)
                 print("logic set to None", file=stderr)
-            self.logExp = None
+                self.logExp = None
 
     def set_rate(self, rate_up, rate_down):
         """Set the value of rate_up and rate_down."""
