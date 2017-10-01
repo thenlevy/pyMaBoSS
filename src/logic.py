@@ -6,7 +6,7 @@ import pyparsing as pp
 
 boolExp = pp.Forward()
 varName = pp.Word(pp.alphas, pp.alphanums+'_')
-boolCst = pp.oneOf("True False")
+boolCst = pp.oneOf("_True _False")
 boolNot = pp.oneOf("! NOT")
 boolBinOp = pp.oneOf("&& & AND || | OR ^ XOR")
 lparen = pp.Suppress('(')
