@@ -16,9 +16,9 @@ boolExp << (boolCst | varName | (boolNot + boolExp) | (lparen + boolExp
                                                        + rparen))
 
 
-def _check_logic_syntax(str):
-    """Return True iff str is a syntaxically correct boolean expression."""
-    return boolExp.matches(str)
+def _check_logic_syntax(string):
+    """Return True iff string is a syntaxically correct boolean expression."""
+    return boolExp.matches(string)
 
 
 def _check_logic_defined(name_list, logic_list):
@@ -39,9 +39,9 @@ def _check_logic_defined(name_list, logic_list):
 
     varName.setParseAction(check_var)
 
-    for str in logic_list:
-        if not _check_logic_syntax(str):
-            print("Error: syntax error %s" % str, file=stderr)
+    for string in logic_list:
+        if not _check_logic_syntax(string):
+            print("Error: syntax error %s" % string, file=stderr)
             return False
         if _check_logic_defined.failed:
             varName.setParseAction(lambda x: x)
