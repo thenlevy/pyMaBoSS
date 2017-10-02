@@ -17,13 +17,6 @@ _default_parameter_list = {'time_tick': 0.1,
                   }
 
 
-def _str_istate(nd):
-    "String representing the initial state probability in cfg format."""
-    return ('[' + nd.name + '].istate = '
-            + str(nd.istate[0]) + '[0] , '
-            + str(nd.istate[1]) + '[1];')
-
-
 class Simulation():
     def __init__(self, nt, **kwargs):
         """
@@ -45,8 +38,7 @@ class Simulation():
         print(self.network, file=out)
 
     def print_cfg(self, out=stdout):
-        for nd in self.network.nodeList:
-            print(_str_istate(nd), file=out)
+        self.network.print_istate(out=out)
         print('', file=out)
 
         for p in self.param:
