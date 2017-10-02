@@ -53,6 +53,9 @@ class Node:
             print("Warning, syntax error: %s" % string, file=stderr)
             print("logExp was not modified", file=stderr)
 
+    def __str__(self):
+        return _strNode(self)
+
 
 class Network:
     """
@@ -63,6 +66,7 @@ class Network:
     """
 
     def __init__(self, nodeList, stateList=None):
+        self.nodeList = nodeList
         self.names = [nd.name for nd in nodeList]
         self.logicExp = {nd.name: nd.logExp for nd in nodeList}
         self.state = {nd.name: False for nd in nodeList}
@@ -74,3 +78,21 @@ class Network:
         if not logic._check_logic_defined(self.names,
                                           [nd.logExp for nd in nodeList]):
             raise ValueError("Some logic rule had unkown variables")
+
+    def __str__(self):
+        return _strNetwork(self)
+
+
+
+def _strNode(nd):
+    string = "\n".join(["Node " + nd.name + " {",
+                        "\tlogic = " + nd.logExp + ";",
+                        "\trate_up = @logic ? " + str(nd.rt_up) + " : 0;",
+                        "\trate_down = @logic ? 0 : " + str(nd.rt_down) + ";",
+                        "}"])
+    return string
+
+def _strNetwork(nt):
+    string = _strNode(nt.nodeList[0])
+    string += "\n" + "\n\n".join(_strNode(nd) for nd in nt.nodeList[1:])
+    return string
