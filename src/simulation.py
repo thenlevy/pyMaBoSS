@@ -46,8 +46,8 @@ class Simulation():
 
     def print_cfg(self, out=stdout):
         for nd in self.network.nodeList:
-            print(_str_istate(nd))
-        print('')
+            print(_str_istate(nd), file=out)
+        print('', file=out)
 
         for p in self.param:
-            print(p + ' = ' + str(self.param[p]) + ';')
+            print(p + ' = ' + str(self.param[p]) + ';', file=out)
