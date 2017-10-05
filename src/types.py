@@ -28,6 +28,7 @@ class Node:
         self.name = name
         self.set_logic(logExp)
         self.set_rate(rt_up, rt_down)
+        self.is_internal = False
 
 
     def set_rate(self, rate_up, rate_down):
@@ -48,22 +49,6 @@ class Node:
             print("logExp set to None", file=stderr)
             self.logExp = None
 
-    def set_istate(self, istate):
-        """
-        Set the initial state probability of the node.
-        
-        istate must be a list [p1, p2] with 0 <= p1, p2 <= 1 and p1 + p2 == 1.
-        """
-        if len(istate) != 2:
-            print("Error, istate must be of length 2. Set to default",
-                  file=stderr)
-            self.istate = [0.5, 0.5]
-        elif istate[0] < 0 or istate[1] < 0 or istate[0] + istate[1] != 1:
-            print("Error, inconsistant value for istate. Set to default",
-                  file=stderr)
-            self.istate = [0.5, 0.5]
-        else:
-            self.istate = istate
         
     def __str__(self):
         return _strNode(self)

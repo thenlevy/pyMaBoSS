@@ -43,3 +43,7 @@ class Simulation():
 
         for p in self.param:
             print(p + ' = ' + str(self.param[p]) + ';', file=out)
+
+        for nd in self.network.nodeList:
+            string = nd.name+'.is_internal = ' + str(int(nd.is_internal)) +';'
+            print(string, file=out)
