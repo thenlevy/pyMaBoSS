@@ -5,6 +5,7 @@ sys.path.append('..')
 from src.types import Node, Network
 from src.simulation import Simulation
 from src.ui import export_and_run
+from src.figures import plot_trajectory
 
 nd_dnaDam = Node('DNAdam', '(!p53_b1 & DNAdam)', 1, 1)
 nd_p53_b1 = Node('p53_b1', '((!p53_b2 & !Mdm2nuc) | p53_b2)', 1, 1)
@@ -23,4 +24,4 @@ testNet.set_istate('DNAdam', [0.4, 0.6])
 
 nd_dnaDam.is_internal = True
 testSimul = Simulation(testNet)
-
+plot_trajectory('a')

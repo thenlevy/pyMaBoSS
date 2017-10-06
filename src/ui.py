@@ -6,6 +6,7 @@ from sys import stderr
 from contextlib import ExitStack
 from src.simulation import Simulation
 from src.types import Node, Network
+from src.figures import plot_trajectory
 
 def export_and_run(simul, output='a'):
     """
@@ -25,7 +26,3 @@ def export_and_run(simul, output='a'):
         print("Error, MaBoSS returned non 0 value", file=stderr)
     else:
         print("MaBoSS returned 0", file=stderr)
-    
-
-
-
