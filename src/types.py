@@ -92,26 +92,33 @@ class Network:
                 return
             else:
                 if isinstance(self._attribution[nodes], tuple):
-                    print("Warning, node was previously bound to other node",
-                          file=stderr)
+                    print("Warning, node %s was previously bound to other" \
+ "node" % nodes,
+                        file=stderr)
                     self._erase_binding(nodes)
                 self._initState[nodes] = {0: probDict[0], 1: probDict[1]}
 
         elif _testStateDict(probDict, len(nodes)):
             for node in nodes:
-                if isinstance(self._attribution[node], tuple): 
-                    print("Warning, node was previously bound to other node",
+                if (isinstance(self._attribution[node], tuple)
+                    and self._attribution[node] != tuple(nodes)): 
+
+                    print("Warning, node %s was previously bound to other" \
+ "node" % node,
                           file=stderr)
                     self._erase_binding(node)
                     self._attribution[node] = tuple(nodes)
-                else:
-                    self._initState.pop(node)
+
+            # Now, forall node in nodes, self_attribution[node] is a singleton
+            for node in nodes:
+                self._initState.pop(node)
+                self._attribution[node] = tuple(nodes)
 
             self._initState[tuple(nodes)] = probDict
 
 
     def _erase_binding(self, node):
-        self._initState.pop(self._attribution(node))
+        self._initState.pop(self._attribution[node])
         for nd in self._attribution[node]:
             self._attribution[nd] = [nd]
             self.set_istate(nd, [0.5, 0.5])
