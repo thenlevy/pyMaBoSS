@@ -42,3 +42,21 @@ def plot_trajectory(prefix):
     plot_table.plot()
     plt.legend(loc='best')
     plt.show()
+
+
+def plot_piechart(prefix):
+    table_file = "{}_probtraj.csv".format(prefix)
+    table = pd.read_csv(table_file, "\t")
+    plot_table = make_plot_table(table)
+    plot_line = plot_table.iloc[-1].rename("")
+    plotting_labels = []
+    for value_index, value in enumerate(plot_line):
+        if value >= 0.1:
+            plotting_labels.append(plot_line.index.values[value_index])
+        else:
+            plotting_labels.append("")
+    ax = plt.subplot()
+    ax.pie(plot_line, labels=plotting_labels, radius=1.2, labeldistance=0.4,
+           startangle=90)
+    ax.legend(plot_line.index.values, loc=(0.9, 0.8), fontsize=8)
+    plt.show()

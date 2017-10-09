@@ -2,7 +2,7 @@
 
 
 from sys import stderr, stdout
-from .figures import plot_trajectory
+from .figures import plot_trajectory, plot_piechart
 from contextlib import ExitStack
 import uuid
 import subprocess
@@ -72,8 +72,6 @@ class Simulation(object):
             print("MaBoSS returned 0", file=stderr)
 
         return Result(prefix)
-        
-
 
 
 class Result(object):
@@ -85,6 +83,9 @@ class Result(object):
     def plot_trajectory(self):
         plot_trajectory(self._prefix) 
         
+
+    def plot_piechart(self):
+        plot_piechart(self._prefix)
     
 
     
