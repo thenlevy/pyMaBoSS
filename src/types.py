@@ -4,7 +4,7 @@ from src import logic
 from sys import stderr, stdout
 
 
-class Node:
+class Node(object):
     """
     Represent a node of a boolean network.
 
@@ -18,7 +18,7 @@ class Node:
     value 0 and rate_down the value rt_down.
     """
 
-    def __init__(self, name, logExp=None, rt_up=1, rt_down=1):
+    def __init__(self, name, logExp=None, rt_up=1, rt_down=1, is_internal=False):
         """
         Create a node not yet inserted in a network.
 
@@ -28,7 +28,7 @@ class Node:
         self.name = name
         self.set_logic(logExp)
         self.set_rate(rt_up, rt_down)
-        self.is_internal = False
+        self.is_internal = is_internal
 
 
     def set_rate(self, rate_up, rate_down):
@@ -54,7 +54,7 @@ class Node:
         return _strNode(self)
 
 
-class Network:
+class Network(object):
     """
     Represent a boolean network.
 

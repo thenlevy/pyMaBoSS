@@ -2,6 +2,10 @@
 
 
 from sys import stderr, stdout
+from .figures import plot_trajectory
+from contextlib import ExitStack
+import uuid
+import subprocess
 
 _default_parameter_list = {'time_tick': 0.1,
                   'max_time': 4,
@@ -17,7 +21,7 @@ _default_parameter_list = {'time_tick': 0.1,
                   }
 
 
-class Simulation():
+class Simulation(object):
     def __init__(self, nt, **kwargs):
         """
         Initialize the Simulation object.
@@ -47,3 +51,40 @@ class Simulation():
         for nd in self.network.nodeList:
             string = nd.name+'.is_internal = ' + str(int(nd.is_internal)) +';'
             print(string, file=out)
+
+    def run(self, prefix=None):
+        tmp = prefix is None # Indicates if the MaBoSS files should be temporary
+        if prefix is None:
+            prefix = str(uuid.uuid4())
+
+        with ExitStack() as stack:
+            bnd_file = stack.enter_context(open(prefix + '.bnd', 'w'))
+            cfg_file = stack.enter_context(open(prefix + '.cfg', 'w'))
+            self.print_bnd(out=bnd_file)
+            self.print_cfg(out=cfg_file)
+        
+            
+        err = subprocess.call(["MaBoSS", "-c", cfg_file.name, "-o", prefix,
+                     bnd_file.name])
+        if err:
+            print("Error, MaBoSS returned non 0 value", file=stderr)
+        else:
+            print("MaBoSS returned 0", file=stderr)
+
+        return Result(prefix)
+        
+
+
+
+class Result(object):
+
+    def __init__(self, prefix):
+        self._prefix=prefix
+
+
+    def plot_trajectory(self):
+        plot_trajectory(self._prefix) 
+        
+    
+
+    

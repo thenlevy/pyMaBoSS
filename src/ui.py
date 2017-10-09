@@ -4,9 +4,9 @@
 import subprocess
 from sys import stderr
 from contextlib import ExitStack
-from src.simulation import Simulation
-from src.types import Node, Network
-from src.figures import plot_trajectory
+from .simulation import Simulation
+from .types import Node, Network
+from .figures import plot_trajectory
 
 def export_and_run(simul, output='a'):
     """
