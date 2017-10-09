@@ -37,9 +37,10 @@ class Simulation(object):
                 print("Warning: unused parameter %s" % p, file=stderr)
 
         self.network = nt
+        self._mutations = {}
 
     def print_bnd(self, out=stdout):
-        print(self.network, file=out)
+        print(self.network._strMut(self._mutations), file=out)
 
     def print_cfg(self, out=stdout):
         self.network.print_istate(out=out)
@@ -72,6 +73,20 @@ class Simulation(object):
             print("MaBoSS returned 0", file=stderr)
 
         return Result(prefix)
+
+
+    def mutate(self, node, state):
+        if all([nd.name != node for nd in self.network.nodeList]):
+            print("Error, unknown node %s" % node, file=stderr)
+            return
+
+        if state not in ["ON", "OFF", "WT"]:
+            print("Error, state must be ON, OFF, or WT", file=stderr)
+            return
+
+        self._mutations[node] = state
+        
+            
 
 
 class Result(object):

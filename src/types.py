@@ -128,11 +128,11 @@ class Network(object):
         return _strNetwork(self)
 
 
+    def _strMut(self, mutations):
+        return _strNetwork(self, mutations)
+        
     def print_istate(self, out=stdout):
         print(_str_istateList(self._initState), file=out)
-
-
-            
 
 
 def _testStateDict(stDict, nbState):
@@ -155,19 +155,35 @@ def _testStateDict(stDict, nbState):
         return True
  
 
-def _strNode(nd):
-    string = "\n".join(["Node " + nd.name + " {",
-                        "\tlogic = " + nd.logExp + ";",
-                        "\trate_up = @logic ? " + str(nd.rt_up) + " : 0;",
-                        "\trate_down = @logic ? 0 : " + str(nd.rt_down) + ";",
-                        "}"])
+def _strNode(nd, mutations={}):
+    string = ""
+    if nd.name not in mutations or mutations[nd.name]=="WT":
+        string = "\n".join(["Node " + nd.name + " {",
+                            "\tlogic = " + nd.logExp + ";",
+                            ("\trate_up = @logic ? " + str(nd.rt_up)
+                             + " : 0;"),
+                            ("\trate_down = @logic ? 0 : "
+                             + str(nd.rt_down) + ";"),
+                            "}"])
+    elif mutations[nd.name]=="ON":
+        string = "\n".join(["Node " + nd.name + " {",
+                            "\trate_up = 1E+99;",
+                            "\trate_down = 0;",
+                            "}"])
+    else:
+        assert(mutations[nd.name]=="OFF")
+        string = "\n".join(["Node " + nd.name + " {",
+                            "\trate_up = 0;",
+                            "\trate_down = 1E+99;",
+                            "}"])
     return string
 
 
-def _strNetwork(nt):
+def _strNetwork(nt, mutations={}):
     string = _strNode(nt.nodeList[0])
     if len(nt.nodeList) > 1:
-       string += "\n" + "\n\n".join(_strNode(nd) for nd in nt.nodeList[1:])
+       string += "\n"
+       string += "\n\n".join(_strNode(nd, mutations) for nd in nt.nodeList[1:])
     return string
 
 

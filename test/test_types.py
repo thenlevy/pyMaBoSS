@@ -24,4 +24,4 @@ testNet.set_istate('DNAdam', [0.4, 0.6])
 
 nd_dnaDam.is_internal = True
 testSimul = Simulation(testNet)
-res = testSimul.run()
+res = testSimul.run(prefix="test")
