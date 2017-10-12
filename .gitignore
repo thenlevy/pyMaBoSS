@@ -1,0 +1,7 @@
+*.csv
+*.bnd
+*.cfg
+*~
+\#*\#
+*/__pycache__
+*.txt

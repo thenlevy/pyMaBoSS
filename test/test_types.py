@@ -2,10 +2,10 @@
 
 import sys
 sys.path.append('..')
-from src.types import Node, Network
-from src.simulation import Simulation, Result
-from src.ui import export_and_run
-from src.figures import plot_trajectory
+from maboss.types import Node, Network
+from maboss.simulation import Simulation, Result
+from maboss.ui import export_and_run
+from maboss.figures import plot_trajectory
 
 nd_dnaDam = Node('DNAdam', '!p53_b1 & DNAdam', 1, 1)
 nd_p53_b1 = Node('p53_b1', '!p53_b2 & !Mdm2nuc | p53_b2', 1, 1)

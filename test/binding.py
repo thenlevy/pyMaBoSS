@@ -2,7 +2,7 @@
 
 import sys
 sys.path.append('..')
-from src.types import Node, Network
+from maboss.types import Node, Network
 
 nd_dnaDam = Node('DNAdam', '(!p53_b1 & DNAdam)', 1, 1)
 nd_p53_b1 = Node('p53_b1', '((!p53_b2 & !Mdm2nuc) | p53_b2)', 1, 1)

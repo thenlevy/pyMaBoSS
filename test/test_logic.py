@@ -3,7 +3,7 @@
 
 import sys
 sys.path.append('..')
-from src import logic
+from maboss import logic
 
 print("Check _check_logic_defined")
 print("   zerology")
