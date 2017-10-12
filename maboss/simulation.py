@@ -40,9 +40,12 @@ class Simulation(object):
         self._mutations = {}
 
     def print_bnd(self, out=stdout):
-        print(self.network._strMut(self._mutations), file=out)
+        print(self.network._strMut(self._mutations, bnd=True), file=out)
 
     def print_cfg(self, out=stdout):
+        for nd in self.network.nodeList:
+            print("$u_" + nd.name + " = " + str(nd.rt_up) + ';', file=out)
+            print("$d_" + nd.name + " = " + str(nd.rt_down) + ';', file=out) 
         self.network.print_istate(out=out)
         print('', file=out)
 
