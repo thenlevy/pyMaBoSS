@@ -12,13 +12,13 @@ boolOr = pp.oneOf("|| | OR")
 boolXor = pp.oneOf("^ XOR")
 varName = (~boolAnd + ~boolOr + ~boolXor + ~boolNot + ~boolCst
            + ~pp.Literal('Node') + pp.Word(pp.alphas, pp.alphanums+'_'))
-lparen = pp.Suppress('(')
-rparen = pp.Suppress(')')
-logTerm = pp.Group(pp.Optional(boolNot)
-                   +( boolCst | varName | pp.Group(lparen + logExp + rparen)))
-logAnd = pp.Group(logTerm + pp.ZeroOrMore(boolAnd + logTerm))
-logOr = pp.Group(logAnd + pp.ZeroOrMore(boolOr + logAnd))
-logExp << pp.Group(logOr + pp.ZeroOrMore(boolXor + logOr))
+lparen = '('
+rparen = ')'
+logTerm = (pp.Optional(boolNot)
+           + (boolCst | varName | (lparen + logExp + rparen)))
+logAnd = logTerm + pp.ZeroOrMore(boolAnd + logTerm)
+logOr = logAnd + pp.ZeroOrMore(boolOr + logAnd)
+logExp << pp.Combine(logOr + pp.ZeroOrMore(boolXor + logOr), adjacent=False, joinString=' ')
 
 
 def _check_logic_syntax(string):
