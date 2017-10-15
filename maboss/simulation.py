@@ -40,7 +40,7 @@ class Simulation(object):
         self._mutations = {}
 
     def print_bnd(self, out=stdout):
-        print(self.network._strMut(self._mutations, bnd=True), file=out)
+        print(self.network, file=out)
 
     def print_cfg(self, out=stdout):
         for nd in self.network.nodeList:
@@ -83,11 +83,23 @@ class Simulation(object):
             print("Error, unknown node %s" % node, file=stderr)
             return
 
-        if state not in ["ON", "OFF", "WT"]:
+        if state == "ON":
+            self.network.set_istate(node, [0, 1])
+            self.network[node].set_rate(1, 0)
+
+        elif state == "OFF":
+            self.network.set_istate(node, [1, 0])
+            self.network[node].set_rate(0, 1)
+
+        elif state == "WT":
+            self.network.set_istate(node, [0.5, 0.5])
+            self.network[node].set_rate(1, 1)
+        
+        else:
             print("Error, state must be ON, OFF, or WT", file=stderr)
             return
 
-        self._mutations[node] = state
+
         
             
 

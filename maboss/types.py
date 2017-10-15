@@ -128,9 +128,6 @@ class Network(dict):
     def __str__(self):
         return _strNetwork(self)
 
-
-    def _strMut(self, mutations, bnd=False):
-        return _strNetwork(self, mutations, bnd)
         
     def print_istate(self, out=stdout):
         print(_str_istateList(self._initState), file=out)
@@ -156,39 +153,25 @@ def _testStateDict(stDict, nbState):
         return True
  
 
-def _strNode(nd, mutations={}, bnd=False):
+def _strNode(nd):
     string = ""
-    if nd.name not in mutations or mutations[nd.name]=="WT":
-        rt_up_str = ("$u_" + nd.name) if bnd else str(nd.rt_up)
-        rt_down_str = ("$d_" + nd.name) if bnd else str(nd.rt_down)
-        string = "\n".join(["Node " + nd.name + " {",
-                            "\tlogic = " + nd.logExp + ";",
-                            ("\trate_up = @logic ? " + rt_up_str
-                             + " : 0;"),
-                            ("\trate_down = @logic ? 0 : "
-                             + rt_down_str + ";"),
-                            "}"])
-    elif mutations[nd.name]=="ON":
-        string = "\n".join(["Node " + nd.name + " {",
-                            "\tlogic = " + nd.logExp + ";",
-                            "\trate_up = 1E+99;",
-                            "\trate_down = 0;",
-                            "}"])
-    else:
-        assert(mutations[nd.name]=="OFF")
-        string = "\n".join(["Node " + nd.name + " {",
-                            "\tlogic = " + nd.logExp + ";",
-                            "\trate_up = 0;",
-                            "\trate_down = 1E+99;",
-                            "}"])
+    rt_up_str = str(nd.rt_up)
+    rt_down_str = str(nd.rt_down)
+    string = "\n".join(["Node " + nd.name + " {",
+                        "\tlogic = " + nd.logExp + ";",
+                        ("\trate_up = @logic ? " + rt_up_str
+                            + " : 0;"),
+                        ("\trate_down = @logic ? 0 : "
+                            + rt_down_str + ";"),
+                        "}"])
     return string
 
 
-def _strNetwork(nt, mutations={}, bnd=False):
+def _strNetwork(nt):
     string = _strNode(nt.nodeList[0])
     if len(nt.nodeList) > 1:
        string += "\n"
-       string += "\n\n".join(_strNode(nd, mutations, bnd) for nd in nt.nodeList[1:])
+       string += "\n\n".join(_strNode(nd) for nd in nt.nodeList[1:])
     return string
 
 
