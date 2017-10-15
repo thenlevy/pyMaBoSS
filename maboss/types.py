@@ -54,7 +54,7 @@ class Node(object):
         return _strNode(self)
 
 
-class Network(object):
+class Network(dict):
     """
     Represent a boolean network.
 
@@ -63,6 +63,7 @@ class Network(object):
     """
 
     def __init__(self, nodeList):
+        super().__init__({nd.name : nd for nd in nodeList})
         self.nodeList = nodeList
         self.names = [nd.name for nd in nodeList]
         self.logicExp = {nd.name: nd.logExp for nd in nodeList}

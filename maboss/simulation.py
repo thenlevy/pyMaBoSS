@@ -79,7 +79,7 @@ class Simulation(object):
 
 
     def mutate(self, node, state):
-        if all([nd.name != node for nd in self.network.nodeList]):
+        if node not in self.network:
             print("Error, unknown node %s" % node, file=stderr)
             return
 
