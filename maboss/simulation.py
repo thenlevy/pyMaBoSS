@@ -2,7 +2,7 @@
 
 
 from sys import stderr, stdout
-from .figures import plot_trajectory, plot_piechart
+from figures import plot_trajectory, plot_piechart
 from contextlib import ExitStack
 import uuid
 import subprocess
@@ -32,7 +32,7 @@ class Simulation(object):
         self.param = _default_parameter_list
         for p in kwargs:
             if p in _default_parameter_list:
-                self.param[p] = kwarg[p]
+                self.param[p] = kwargs[p]
             else:
                 print("Warning: unused parameter %s" % p, file=stderr)
 
@@ -45,7 +45,7 @@ class Simulation(object):
     def print_cfg(self, out=stdout):
         for nd in self.network.nodeList:
             print("$u_" + nd.name + " = " + str(nd.rt_up) + ';', file=out)
-            print("$d_" + nd.name + " = " + str(nd.rt_down) + ';', file=out) 
+            print("$d_" + nd.name + " = " + str(nd.rt_down) + ';', file=out)
         self.network.print_istate(out=out)
         print('', file=out)
 
@@ -66,8 +66,8 @@ class Simulation(object):
             cfg_file = stack.enter_context(open(prefix + '.cfg', 'w'))
             self.print_bnd(out=bnd_file)
             self.print_cfg(out=cfg_file)
-        
-            
+
+
         err = subprocess.call(["MaBoSS", "-c", cfg_file.name, "-o", prefix,
                      bnd_file.name])
         if err:
@@ -94,14 +94,14 @@ class Simulation(object):
         elif state == "WT":
             self.network.set_istate(node, [0.5, 0.5])
             self.network[node].set_rate(1, 1)
-        
+
         else:
             print("Error, state must be ON, OFF, or WT", file=stderr)
             return
 
 
-        
-            
+
+
 
 
 class Result(object):
@@ -111,11 +111,8 @@ class Result(object):
 
 
     def plot_trajectory(self):
-        plot_trajectory(self._prefix) 
-        
+        plot_trajectory(self._prefix)
+
 
     def plot_piechart(self):
         plot_piechart(self._prefix)
-    
-
-    

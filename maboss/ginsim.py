@@ -10,7 +10,9 @@ import pyparsing as pp
 from logic import varName, logExp
 from contextlib import ExitStack
 from network import Node, Network
+from simulation import Simulation
 externVar = pp.Suppress('$') + ~pp.White() + varName
+externVar.setParseAction(lambda token: token[0])
 
 # ====================
 # bnd grammar
@@ -38,30 +40,37 @@ bnd_grammar = pp.OneOrMore(node_decl)
 # =====================
 
 intPart = pp.Word(pp.nums)
-decPart = pp.Literal(".") + ~pp.White() + pp.Word(pp.nums)
-floatMantissa = ((intPart + pp.Optional(~pp.White() + pp.Literal(".")
-                                        + pp.Optional(~pp.White() + intPart)))
-                 | decPart)
-floatNum = floatMantissa + pp.Optional(pp.Suppress(pp.oneOf("eE"))
-                                       + pp.Optional("-") + intPart)
-var_decl = pp.Group((varName | externVar)("lhs") + pp.Suppress('=')
-                    + (floatNum | intPart)("rhs") + pp.Suppress(';'))
+floatNum = pp.Word(pp.nums + '.' + 'E' + 'e' + '-' + '+')
+var_decl = pp.Group(externVar("lhs") + pp.Suppress('=')
+                    + floatNum("rhs") + pp.Suppress(';'))
+
+param_decl = pp.Group(varName("param") + pp.Suppress('=')
+                      + floatNum("value") + pp.Suppress(';'))
 
 stateSet = (pp.Suppress('[') + intPart
             + pp.ZeroOrMore(pp.Suppress(',') + intPart) + pp.Suppress(']'))
 
 stateProb = floatNum + stateSet
+
+# TODO: istate_decl does not match binded istate declaration yet
 istate_decl = pp.Group(pp.Suppress('[') + varName + pp.Suppress('].istate')
                        + pp.Suppress('=') + stateProb
                        + pp.ZeroOrMore(pp.Suppress(',') + stateProb)
                        + pp.Suppress(';'))
 
-cfg_decl = var_decl | istate_decl
+internal_decl = pp.Group(varName("node") + ~pp.White()
+                         + pp.Suppress(".is_internal") + pp.Suppress('=')
+                         + pp.oneOf('0 1')("is_internal_val")
+                         + pp.Suppress(';'))
+
+cfg_decl = var_decl | istate_decl | param_decl | internal_decl
 cfg_grammar = pp.ZeroOrMore(cfg_decl)
 
 
 def build_network(prefix):
     """Read prefix.bnd and prefix.cfg and build the corresponding Network."""
+
+    # TODO: interpret istate_decl...
     with ExitStack() as stack:
         bnd_file = stack.enter_context(open(prefix + '.bnd', 'r'))
         cfg_file = stack.enter_context(open(prefix + '.cfg', 'r'))
@@ -75,14 +84,33 @@ def build_network(prefix):
             print("Error: syntax error in bnd file", file=stderr)
             return
 
-        variables = {}
-        nodes = []
-        parse_cfg = cfg_grammar.parseString(cfg_content)
-        for token in parse_cfg:
-            if token.lhs:  # This evaluates to False if token is an istate_decl
-                variables[token.lhs] = token.rhs
+        variables, parameters, is_internal_list = _read_cfg(cfg_content)
+        print(variables)
+        nodes = _read_bnd(bnd_content, variables, is_internal_list)
 
-        parse_bnd = bnd_grammar.parseString(bnd_content)
+        net = Network(nodes)
+        return Simulation(net, **parameters)
+
+
+def _read_cfg(string):
+        variables = {}
+        parameters = {}
+        is_internal_list = {}
+        parse_cfg = cfg_grammar.parseString(string)
+        for token in parse_cfg:
+            if token.lhs:  # True if token is var_decl
+                variables[token.lhs] = token.rhs
+            if token.node:  # True if token is internal_decl
+                is_internal_list[token.node] = float(token.is_internal_val)
+            if token.param:  # True if token is param_decl
+                parameters[token.param] = float(token.value)
+
+        return (variables, parameters, is_internal_list)
+
+
+def _read_bnd(string, variables, is_internal_list):
+        nodes = []
+        parse_bnd = bnd_grammar.parseString(string)
         for token in parse_bnd:
             rate_up = token.rate_up
             if type(rate_up) is str:
@@ -96,7 +124,10 @@ def build_network(prefix):
                     print("Error unknown variable %s" % rate_down, file=stderr)
                     return
                 rate_down = float(variables[rate_down])
-            nodes.append(Node(token.name, token.logic, rate_up, rate_down))
 
-            # TODO read is_internal value
-        return Network(nodes)
+            internal = (is_internal_list[token.name]
+                        if token.name in is_internal_list
+                        else False)
+            nodes.append(Node(token.name, token.logic, rate_up, rate_down,
+                              internal))
+        return nodes
