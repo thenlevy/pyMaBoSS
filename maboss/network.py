@@ -79,7 +79,7 @@ class Network(dict):
         self._initState = {l: {0: 0.5, 1: 0.5} for l in self._attribution}
 
     def set_istate(self, nodes, probDict):
-        if not isinstance(nodes, list):
+        if not (isinstance(nodes, list) or isinstance(nodes, tuple)):
             if not len(probDict) == 2:
                 print("Error, must provide a list or dictionary of size 2",
                       file=stderr)

@@ -40,23 +40,25 @@ bnd_grammar = pp.OneOrMore(node_decl)
 # =====================
 
 intPart = pp.Word(pp.nums)
+intPart.setParseAction(lambda token: int(token[0]))
 floatNum = pp.Word(pp.nums + '.' + 'E' + 'e' + '-' + '+')
+floatNum.setParseAction(lambda token: float(token[0]))
 var_decl = pp.Group(externVar("lhs") + pp.Suppress('=')
                     + floatNum("rhs") + pp.Suppress(';'))
 
 param_decl = pp.Group(varName("param") + pp.Suppress('=')
                       + floatNum("value") + pp.Suppress(';'))
 
-stateSet = (pp.Suppress('[') + intPart
-            + pp.ZeroOrMore(pp.Suppress(',') + intPart) + pp.Suppress(']'))
+stateSet = (pp.Suppress('[') + pp.Group(pp.delimitedList(intPart))
+            + pp.Suppress(']'))
+stateSet.setParseAction(lambda token: list(token))
 
-stateProb = floatNum + stateSet
+stateProb = floatNum('proba') + stateSet("states")
+stateProb.setParseAction(lambda token: (token.proba, token.states))
 
-# TODO: istate_decl does not match binded istate declaration yet
-istate_decl = pp.Group(pp.Suppress('[') + varName + pp.Suppress('].istate')
-                       + pp.Suppress('=') + stateProb
-                       + pp.ZeroOrMore(pp.Suppress(',') + stateProb)
-                       + pp.Suppress(';'))
+istate_decl = pp.Group(pp.Suppress('[') + pp.delimitedList(varName)("nodes")
+                       + pp.Suppress('].istate') + pp.Suppress('=')
+                       + pp.delimitedList(stateProb)('attrib') + pp.Suppress(';'))
 
 internal_decl = pp.Group(varName("node") + ~pp.White()
                          + pp.Suppress(".is_internal") + pp.Suppress('=')
@@ -84,11 +86,14 @@ def build_network(prefix):
             print("Error: syntax error in bnd file", file=stderr)
             return
 
-        variables, parameters, is_internal_list = _read_cfg(cfg_content)
-        print(variables)
+        (variables, parameters, is_internal_list,
+         istate_list) = _read_cfg(cfg_content)
+
         nodes = _read_bnd(bnd_content, variables, is_internal_list)
 
         net = Network(nodes)
+        for istate in istate_list:
+            net.set_istate(istate, istate_list[istate])
         return Simulation(net, **parameters)
 
 
@@ -96,6 +101,7 @@ def _read_cfg(string):
         variables = {}
         parameters = {}
         is_internal_list = {}
+        istate_list = {}
         parse_cfg = cfg_grammar.parseString(string)
         for token in parse_cfg:
             if token.lhs:  # True if token is var_decl
@@ -104,8 +110,17 @@ def _read_cfg(string):
                 is_internal_list[token.node] = float(token.is_internal_val)
             if token.param:  # True if token is param_decl
                 parameters[token.param] = float(token.value)
+            if token.attrib:  # True if token is istate_decl
+                # TODO check if lens are consistent
+                if len(token.nodes) == 1:
+                    istate_list[token.nodes[0]] = {int(t[1][0]): t[0]
+                                                for t in token.attrib}
+                else:
+                    nodes = tuple(token.nodes)
+                    istate_list[nodes] = {tuple(t[1]): t[0]
+                                          for t in token.attrib}
 
-        return (variables, parameters, is_internal_list)
+        return (variables, parameters, is_internal_list, istate_list)
 
 
 def _read_bnd(string, variables, is_internal_list):
