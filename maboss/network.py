@@ -1,6 +1,6 @@
 """Definitions of the different classes provided to the user."""
 
-from . import logic
+import logic
 from sys import stderr, stdout
 
 
@@ -30,7 +30,6 @@ class Node(object):
         self.set_rate(rt_up, rt_down)
         self.is_internal = is_internal
 
-
     def set_rate(self, rate_up, rate_down):
         """Set the value of rate_up and rate_down."""
         if rate_up < 0 or rate_down < 0:
@@ -49,7 +48,6 @@ class Node(object):
             print("logExp set to None", file=stderr)
             self.logExp = None
 
-        
     def __str__(self):
         return _strNode(self)
 
@@ -63,7 +61,7 @@ class Network(dict):
     """
 
     def __init__(self, nodeList):
-        super().__init__({nd.name : nd for nd in nodeList})
+        super().__init__({nd.name: nd for nd in nodeList})
         self.nodeList = nodeList
         self.names = [nd.name for nd in nodeList]
         self.logicExp = {nd.name: nd.logExp for nd in nodeList}
@@ -80,7 +78,6 @@ class Network(dict):
         # probabilities.
         self._initState = {l: {0: 0.5, 1: 0.5} for l in self._attribution}
 
-
     def set_istate(self, nodes, probDict):
         if not isinstance(nodes, list):
             if not len(probDict) == 2:
@@ -88,25 +85,22 @@ class Network(dict):
                       file=stderr)
                 return
             elif (probDict[0] < 0 or probDict[1] < 0
-                  or not probDict[0] + probDict[1]==1):
+                  or not probDict[0] + probDict[1] == 1):
                 print("Error, bad value for probabilites", file=stderr)
                 return
             else:
                 if isinstance(self._attribution[nodes], tuple):
-                    print("Warning, node %s was previously bound to other" \
- "node" % nodes,
-                        file=stderr)
+                    print("Warning, node %s was previously bound to other"
+                          "node" % nodes, file=stderr)
                     self._erase_binding(nodes)
                 self._initState[nodes] = {0: probDict[0], 1: probDict[1]}
 
         elif _testStateDict(probDict, len(nodes)):
             for node in nodes:
                 if (isinstance(self._attribution[node], tuple)
-                    and self._attribution[node] != tuple(nodes)): 
-
-                    print("Warning, node %s was previously bound to other" \
- "node" % node,
-                          file=stderr)
+                   and self._attribution[node] != tuple(nodes)):
+                    print("Warning, node %s was previously bound to other"
+                          "node" % node, file=stderr)
                     self._erase_binding(node)
                     self._attribution[node] = tuple(nodes)
 
@@ -128,7 +122,7 @@ class Network(dict):
     def __str__(self):
         return _strNetwork(self)
 
-        
+
     def print_istate(self, out=stdout):
         print(_str_istateList(self._initState), file=out)
 
@@ -138,7 +132,7 @@ def _testStateDict(stDict, nbState):
     def goodTuple(t):
         return len(t) == nbState and all(x == 0 or x == 1 for x in t)
 
-    
+
     if (not all(isinstance(t, tuple) for t in stDict)
         or not all(goodTuple(t) for t in stDict)):
         print("Error, not all keys are good tuples of length %s" %nbState,
@@ -151,7 +145,7 @@ def _testStateDict(stDict, nbState):
         return False
     else:
         return True
- 
+
 
 def _strNode(nd):
     string = ""
@@ -190,4 +184,3 @@ def _str_istateList(isl):
             string += str(isl[binding][1]) + '[1];'
         stringList.append(string)
     return '\n'.join(stringList)
-        

@@ -12,6 +12,7 @@ boolOr = pp.oneOf("|| | OR")
 boolXor = pp.oneOf("^ XOR")
 varName = (~boolAnd + ~boolOr + ~boolXor + ~boolNot + ~boolCst
            + ~pp.Literal('Node') + pp.Word(pp.alphas, pp.alphanums+'_'))
+varName.setParseAction(lambda token: token[0])
 lparen = '('
 rparen = ')'
 logTerm = (pp.Optional(boolNot)
