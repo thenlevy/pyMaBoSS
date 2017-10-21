@@ -1,6 +1,6 @@
 """Definitions of the different classes provided to the user."""
 
-import logic
+from . import logic
 from sys import stderr, stdout
 
 

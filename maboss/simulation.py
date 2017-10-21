@@ -2,7 +2,7 @@
 
 
 from sys import stderr, stdout
-from figures import plot_trajectory, plot_piechart
+from .figures import plot_trajectory, plot_piechart
 from contextlib import ExitStack
 import uuid
 import subprocess

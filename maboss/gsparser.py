@@ -7,10 +7,10 @@ MaBoSS file.
 
 from sys import stderr
 import pyparsing as pp
-from logic import varName, logExp
+from .logic import varName, logExp
 from contextlib import ExitStack
-from network import Node, Network
-from simulation import Simulation
+from .network import Node, Network
+from .simulation import Simulation
 externVar = pp.Suppress('$') + ~pp.White() + varName
 externVar.setParseAction(lambda token: token[0])
 
