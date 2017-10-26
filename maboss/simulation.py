@@ -6,6 +6,8 @@ from .figures import plot_trajectory, plot_piechart
 from contextlib import ExitStack
 import uuid
 import subprocess
+import tempfile
+import shutil
 
 _default_parameter_list = {'time_tick': 0.1,
                   'max_time': 4,
@@ -53,29 +55,14 @@ class Simulation(object):
             print(p + ' = ' + str(self.param[p]) + ';', file=out)
 
         for nd in self.network.nodeList:
-            string = nd.name+'.is_internal = ' + str(int(nd.is_internal)) +';'
+            string = nd.name+'.is_internal = ' + str(int(nd.is_internal)) + ';'
             print(string, file=out)
 
-    def run(self, prefix=None):
-        tmp = prefix is None # Indicates if the MaBoSS files should be temporary
-        if prefix is None:
-            prefix = str(uuid.uuid4())
+    def run(self):
+        """Run the simulation with MaBoSS and return a Result object.
+        """
 
-        with ExitStack() as stack:
-            bnd_file = stack.enter_context(open(prefix + '.bnd', 'w'))
-            cfg_file = stack.enter_context(open(prefix + '.cfg', 'w'))
-            self.print_bnd(out=bnd_file)
-            self.print_cfg(out=cfg_file)
-
-
-        err = subprocess.call(["MaBoSS", "-c", cfg_file.name, "-o", prefix,
-                     bnd_file.name])
-        if err:
-            print("Error, MaBoSS returned non 0 value", file=stderr)
-        else:
-            print("MaBoSS returned 0", file=stderr)
-
-        return Result(prefix)
+        return Result(self)
 
 
     def mutate(self, node, state):
@@ -106,13 +93,40 @@ class Simulation(object):
 
 class Result(object):
 
-    def __init__(self, prefix):
-        self._prefix=prefix
+    def __init__(self, simul):
+        self._path = tempfile.mkdtemp()
+        self._cfg = tempfile.mkstemp(dir=self._path, suffix='.cfg')[1]
+        self._bnd = tempfile.mkstemp(dir=self._path, suffix='.bnd')[1]
 
+        with ExitStack() as stack:
+            bnd_file = stack.enter_context(open(self._bnd, 'w'))
+            cfg_file = stack.enter_context(open(self._cfg, 'w'))
+            simul.print_bnd(out=bnd_file)
+            simul.print_cfg(out=cfg_file)
+
+        self._err = subprocess.call(["MaBoSS", "-c", self._cfg, "-o",
+                                     self._path+'/res', self._bnd])
+        if self._err:
+            print("Error, MaBoSS returned non 0 value", file=stderr)
+        else:
+            print("MaBoSS returned 0", file=stderr)
 
     def plot_trajectory(self):
-        plot_trajectory(self._prefix)
+        if self._err:
+            print("Error, plot_trajectory cannot be called because MaBoSS"
+                  "returned non 0 value", file=stderr)
+            return
+
+        plot_trajectory(self._path+'/res')
 
 
     def plot_piechart(self):
-        plot_piechart(self._prefix)
+        if self._err:
+            print("Error, plot_piechart cannot be called because MaBoSS"
+                  "returned non 0 value", file=stderr)
+            return
+        plot_piechart(self._path+'/res')
+
+
+    def __del__(self):
+        shutil.rmtree(self._path)
