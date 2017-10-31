@@ -88,10 +88,6 @@ class Simulation(object):
             return
 
 
-
-
-
-
 class Result(object):
 
     def __init__(self, simul, save, prefix):

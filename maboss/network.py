@@ -48,6 +48,7 @@ class Node(object):
             print("logExp set to None", file=stderr)
             self.logExp = None
 
+
     def __str__(self):
         return _strNode(self)
 
@@ -125,6 +126,12 @@ class Network(dict):
 
     def print_istate(self, out=stdout):
         print(_str_istateList(self._initState), file=out)
+
+    def set_output(self, output_list):
+        """Set all the nodes that are not in the output_list as internal."""
+        for nd in self:
+            if nd not in output_list:
+                self[nd].is_internal = True
 
 
 def _testStateDict(stDict, nbState):

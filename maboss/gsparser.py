@@ -47,7 +47,10 @@ var_decl = pp.Group(externVar("lhs") + pp.Suppress('=')
                     + floatNum("rhs") + pp.Suppress(';'))
 
 param_decl = pp.Group(varName("param") + pp.Suppress('=')
-                      + floatNum("value") + pp.Suppress(';'))
+                      + (floatNum("value")
+                         | (pp.CaselessLiteral("True")
+                            | pp.CaselessLiteral("False"))("bValue"))
+                      + pp.Suppress(';'))
 
 stateSet = (pp.Suppress('[') + pp.Group(pp.delimitedList(intPart))
             + pp.Suppress(']'))
@@ -60,13 +63,18 @@ istate_decl = pp.Group(pp.Suppress('[') + pp.delimitedList(varName)("nodes")
                        + pp.Suppress('].istate') + pp.Suppress('=')
                        + pp.delimitedList(stateProb)('attrib') + pp.Suppress(';'))
 
+oneIstate_decl = pp.Group(varName("nd_i") + ~pp.White() + pp.Suppress('.istate')
+                          + pp.Suppress('=') + pp.oneOf('0 1')('istate_val')
+                          + pp.Suppress(';'))
+
 internal_decl = pp.Group(varName("node") + ~pp.White()
                          + pp.Suppress(".is_internal") + pp.Suppress('=')
                          + pp.oneOf('0 1')("is_internal_val")
                          + pp.Suppress(';'))
 
-cfg_decl = var_decl | istate_decl | param_decl | internal_decl
+cfg_decl = var_decl | istate_decl | param_decl | internal_decl | oneIstate_decl
 cfg_grammar = pp.ZeroOrMore(cfg_decl)
+cfg_grammar.ignore('//' + pp.restOfLine)
 
 
 def build_network(prefix):
@@ -109,7 +117,13 @@ def _read_cfg(string):
             if token.node:  # True if token is internal_decl
                 is_internal_list[token.node] = float(token.is_internal_val)
             if token.param:  # True if token is param_decl
-                parameters[token.param] = float(token.value)
+                if token.bValue:
+                    parameters[token.param] = int(bool(token.bValue))
+                else:
+                    parameters[token.param] = float(token.value)
+            if token.nd_i:
+                istate_list[token.nd_i] = {0: 1 - int(token.istate_val),
+                                           1: int(token.istate_val)}
             if token.attrib:  # True if token is istate_decl
                 # TODO check if lens are consistent
                 if len(token.nodes) == 1:
