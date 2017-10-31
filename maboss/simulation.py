@@ -4,10 +4,11 @@
 from sys import stderr, stdout
 from .figures import plot_trajectory, plot_piechart
 from contextlib import ExitStack
-import uuid
+import os
 import subprocess
 import tempfile
 import shutil
+import pyparsing as pp
 
 _default_parameter_list = {'time_tick': 0.1,
                   'max_time': 4,
@@ -58,11 +59,11 @@ class Simulation(object):
             string = nd.name+'.is_internal = ' + str(int(nd.is_internal)) + ';'
             print(string, file=out)
 
-    def run(self):
+    def run(self, save=False, prefix=None):
         """Run the simulation with MaBoSS and return a Result object.
         """
 
-        return Result(self)
+        return Result(self, save, prefix)
 
 
     def mutate(self, node, state):
@@ -93,7 +94,7 @@ class Simulation(object):
 
 class Result(object):
 
-    def __init__(self, simul):
+    def __init__(self, simul, save, prefix):
         self._path = tempfile.mkdtemp()
         self._cfg = tempfile.mkstemp(dir=self._path, suffix='.cfg')[1]
         self._bnd = tempfile.mkstemp(dir=self._path, suffix='.bnd')[1]
@@ -119,7 +120,6 @@ class Result(object):
 
         plot_trajectory(self._path+'/res')
 
-
     def plot_piechart(self):
         if self._err:
             print("Error, plot_piechart cannot be called because MaBoSS"
@@ -127,6 +127,43 @@ class Result(object):
             return
         plot_piechart(self._path+'/res')
 
+    def save(self, prefix, replace=False):
+        if not _check_prefix(prefix):
+            return
+
+        # Create the results directory
+        try:
+            os.mkdir(prefix)
+        except FileExistsError:
+            if not replace:
+                print('Error directory already exists: %s' % prefix,
+                      file=stderr)
+                return
+            elif prefix.startswith('rpl_'):
+                shutil.rmtree(prefix)
+                os.mkdir(prefix)
+            else:
+                print('Error only directries begining with "rpl_" can be'
+                      'replaced', file=stderr)
+                return
+
+        # Moves all the files into it
+        shutil.copy(self._bnd, prefix+'/%s.bnd' % prefix)
+        shutil.copy(self._cfg, prefix+'/%s.cfg' % prefix)
+
+        maboss_files = filter(lambda x: x.startswith('res'),
+                              os.listdir(self._path))
+        for f in maboss_files:
+            shutil.copy(self._path + '/' + f, prefix)
 
     def __del__(self):
         shutil.rmtree(self._path)
+
+
+def _check_prefix(prefix):
+    if type(prefix) is not str:
+        print('Error save method expected string')
+        return False
+    else:
+        prefix_grammar = pp.Word(pp.alphanums + '_-')
+        return prefix_grammar.matches(prefix)
