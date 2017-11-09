@@ -52,6 +52,10 @@ class Node(object):
     def __str__(self):
         return _strNode(self)
 
+    def copy(self):
+        return Node(self.name, self.logExp, self.rt_up, self.rt_down,
+                    self.is_internal)
+
 
 class Network(dict):
     """
@@ -79,6 +83,13 @@ class Network(dict):
         # probabilities.
         self._initState = {l: {0: 0.5, 1: 0.5} for l in self._attribution}
 
+    def copy(self):
+        new_ndList = [nd.copy() for nd in self.nodeList]
+        new_network = Network(new_ndList)
+        new_network._attribution = self._attribution
+        new_network._initState = self._initState
+        return new_network
+    
     def set_istate(self, nodes, probDict):
         if not (isinstance(nodes, list) or isinstance(nodes, tuple)):
             if not len(probDict) == 2:

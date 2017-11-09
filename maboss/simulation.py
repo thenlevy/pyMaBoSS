@@ -42,6 +42,10 @@ class Simulation(object):
         self.network = nt
         self._mutations = {}
 
+    def copy(self):
+        new_network = self.network.copy()
+        return Simulation(new_network, **(self.param))
+
     def print_bnd(self, out=stdout):
         print(self.network, file=out)
 

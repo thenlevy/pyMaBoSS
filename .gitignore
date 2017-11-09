@@ -1,6 +1,8 @@
 *.csv
 *.bnd
+!test/reprod_all.bnd
 *.cfg
+!test/reprod_all.cfg
 *~
 \#*\#
 */__pycache__
