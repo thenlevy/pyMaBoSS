@@ -105,6 +105,16 @@ def build_network(prefix):
         return Simulation(net, **parameters)
 
 
+def load_file(filename):
+    """Loads a network from a MaBoSS format file."""
+
+    if filename.endswith(".cfg") or filename.endswith(".bnd"):
+        filename = filename[:-4]
+        return build_network(filename)
+    else:
+        print("Error, filename must end with .bnd or .cfg", file=stderr)
+        return
+
 def _read_cfg(string):
         variables = {}
         parameters = {}
