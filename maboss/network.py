@@ -92,29 +92,26 @@ class Network(dict):
     
     def set_istate(self, nodes, probDict):
         if not (isinstance(nodes, list) or isinstance(nodes, tuple)):
-            if not len(probDict) == 2:
-                print("Error, must provide a list or dictionary of size 2",
+            if not len(probDict) in [1, 2]:
+                print("Error, must provide a list or dictionary of size 1 or 2",
                       file=stderr)
                 return
-            elif (probDict[0] < 0 or probDict[1] < 0
+            
+            if (probDict[0] < 0 or probDict[1] < 0
                   or not probDict[0] + probDict[1] == 1):
                 print("Error, bad value for probabilites", file=stderr)
                 return
             else:
                 if isinstance(self._attribution[nodes], tuple):
-                    print("Warning, node %s was previously bound to other"
-                          "node" % nodes, file=stderr)
                     self._erase_binding(nodes)
                 self._initState[nodes] = {0: probDict[0], 1: probDict[1]}
 
         elif _testStateDict(probDict, len(nodes)):
             for node in nodes:
-                if (isinstance(self._attribution[node], tuple)
-                   and self._attribution[node] != tuple(nodes)):
+                if isinstance(self._attribution[node], tuple):
                     print("Warning, node %s was previously bound to other"
-                          "node" % node, file=stderr)
+                          "nodes" % node, file=stderr)
                     self._erase_binding(node)
-                    self._attribution[node] = tuple(nodes)
 
             # Now, forall node in nodes, self_attribution[node] is a singleton
             for node in nodes:

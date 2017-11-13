@@ -30,7 +30,7 @@ class Simulation(object):
         Initialize the Simulation object.
 
         nt : a Network object
-        kwarg : parameters of the simulation
+        kwargs : parameters of the simulation
         """
         self.param = _default_parameter_list
         for p in kwargs:
@@ -42,6 +42,13 @@ class Simulation(object):
         self.network = nt
         self._mutations = {}
 
+    def update_parameters(self, **kwargs):
+        for p in kwargs:
+            if p in _default_parameter_list:
+                self.param[p] = kwargs[p]
+            else:
+                print("Warning: unused parameter %s" % p, file=stderr)
+        
     def copy(self):
         new_network = self.network.copy()
         return Simulation(new_network, **(self.param))

@@ -6,6 +6,7 @@ MaBoSS file.
 """
 
 from sys import stderr
+from os.path import isfile
 import pyparsing as pp
 from .logic import varName, logExp
 from contextlib import ExitStack
@@ -79,11 +80,12 @@ cfg_grammar.ignore('//' + pp.restOfLine)
 
 def build_network(prefix):
     """Read prefix.bnd and prefix.cfg and build the corresponding Network."""
-
-    # TODO: interpret istate_decl...
+    cfg_filename = prefix + '.cfg'
+    if not isfile(cfg_filename):
+        cfg_filename = prefix + '.bnd.cfg'  # File produced by the ginsim module
     with ExitStack() as stack:
         bnd_file = stack.enter_context(open(prefix + '.bnd', 'r'))
-        cfg_file = stack.enter_context(open(prefix + '.cfg', 'r'))
+        cfg_file = stack.enter_context(open(cfg_filename, 'r'))
         bnd_content = bnd_file.read()
         cfg_content = cfg_file.read()
 
