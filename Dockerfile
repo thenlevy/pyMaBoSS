@@ -8,12 +8,8 @@ RUN pip install -U pyparsing \
 
 RUN pip install -U --user git+https://github.com/GINsim/GINsim-python
 
+RUN conda install -c conda-forge ipywidgets --yes
     
 COPY maboss /opt/conda/lib/python3.6/site-packages/maboss
-COPY Master_Model.zginml /model/Master_Model.zginml
-COPY tuto.zginml /model/tuto.zginml
-RUN echo '#!/bin/bash ' > /usr/bin/tuto-nb \
-  && echo 'jupyter notebook --allow-root --no-browser --ip=* --port=8888' >> /usr/bin/tuto-nb \
-  && chmod +x /usr/bin/tuto-nb
-
-CMD tuto-nb
+COPY model /model
+COPY notebook /notebook/
