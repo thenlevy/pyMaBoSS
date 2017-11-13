@@ -6,6 +6,7 @@ from .gsparser import build_network, load_file
 from colomoto_jupyter import IN_IPYTHON
 if IN_IPYTHON:
     from colomoto_jupyter import jupyter_setup
+    from .widgets.simulation import wg_set_output
     import ginsim
 
     menu = [
@@ -28,10 +29,10 @@ if IN_IPYTHON:
 
                       {'name': 'Set initial states',
                        'snippet': ["master_simulation.network.set_istate([\"mygenelist\"],{})"]},
-             
+
                       {'name': 'Set output',
                        'snippet': ["master_simulation.network.set_output([\"mygenes\"])"]},
-                          
+
          ]},
 
         {'name': 'Results',
@@ -44,7 +45,7 @@ if IN_IPYTHON:
 
                       {'name': 'Plot trajectory',
                        'snippet': ["master_results.plot_trajectory()"]}]
-         } 
+         }
     ]
 
     toolbar = [
