@@ -9,7 +9,7 @@ RUN pip install -U pyparsing \
 RUN pip install -U --user git+https://github.com/GINsim/GINsim-python
 
 RUN conda install -c conda-forge ipywidgets --yes
-    
-COPY maboss /opt/conda/lib/python3.6/site-packages/maboss
+
+RUN pip install -U --user git+https://github.com/thenlevy/pyMaBoSS
 COPY model /model
 COPY notebook /notebook/

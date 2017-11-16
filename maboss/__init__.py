@@ -6,7 +6,7 @@ from .gsparser import build_network, load_file
 from colomoto_jupyter import IN_IPYTHON
 if IN_IPYTHON:
     from colomoto_jupyter import jupyter_setup
-    from .widgets.simulation import wg_set_output
+    from .widgets import *
     import ginsim
 
     menu = [
@@ -21,8 +21,7 @@ if IN_IPYTHON:
         {'name': 'Simulation',
          'sub-menu': [
                       {'name': 'Create mutant',
-                       'snippet': ["mutant_simulation = master_simulation.copy()",
-                                   "mutant_simulation.mutate(\"myGene\", \"OFF\")"]},
+                       'snippet': ["mutant_simulation = maboss.wg_make_mutant(master_simulation)"]},
 
                       {'name': 'Run',
                        'snippet': ["master_results = master_simulation.run()"]},
