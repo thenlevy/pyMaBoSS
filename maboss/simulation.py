@@ -2,13 +2,14 @@
 
 
 from sys import stderr, stdout
-from .figures import plot_trajectory, plot_piechart
+from .figures import make_plot_trajectory, plot_piechart
 from contextlib import ExitStack
 import os
 import subprocess
 import tempfile
 import shutil
 import pyparsing as pp
+import matplotlib.pyplot as plt
 
 _default_parameter_list = {'time_tick': 0.1,
                   'max_time': 4,
@@ -48,7 +49,7 @@ class Simulation(object):
                 self.param[p] = kwargs[p]
             else:
                 print("Warning: unused parameter %s" % p, file=stderr)
-        
+
     def copy(self):
         new_network = self.network.copy()
         return Simulation(new_network, **(self.param))
@@ -105,6 +106,8 @@ class Result(object):
         self._path = tempfile.mkdtemp()
         self._cfg = tempfile.mkstemp(dir=self._path, suffix='.cfg')[1]
         self._bnd = tempfile.mkstemp(dir=self._path, suffix='.bnd')[1]
+        self._trajfig = None
+        self._piefig = None
 
         with ExitStack() as stack:
             bnd_file = stack.enter_context(open(self._bnd, 'w'))
@@ -117,22 +120,36 @@ class Result(object):
         if self._err:
             print("Error, MaBoSS returned non 0 value", file=stderr)
         else:
-            print("MaBoSS returned 0", file=stderr)
+            print("MaBoSS ended successfuly")
 
     def plot_trajectory(self):
-        if self._err:
-            print("Error, plot_trajectory cannot be called because MaBoSS"
-                  "returned non 0 value", file=stderr)
-            return
+        if self._trajfig is None:
+            if self._err:
+                print("Error, plot_trajectory cannot be called because MaBoSS"
+                      "returned non 0 value", file=stderr)
+                return
+            self._trajfig = self.make_trajectory()
+            return self._trajfig
+        else:
+            return self._trajfig.show()
 
-        plot_trajectory(self._path+'/res')
+    def make_trajectory(self):
+        prefix = self._path+'/res'
+        self._trajfig, self._trajax = plt.subplots(1, 1)
+        make_plot_trajectory(prefix, self._trajax)
+        return self._trajfig
 
     def plot_piechart(self):
-        if self._err:
-            print("Error, plot_piechart cannot be called because MaBoSS"
-                  "returned non 0 value", file=stderr)
-            return
-        plot_piechart(self._path+'/res')
+        if self._piefig is None:
+            if self._err:
+                print("Error, plot_piechart cannot be called because MaBoSS"
+                      "returned non 0 value", file=stderr)
+                return
+            self._piefig, self._pieax = plt.subplots(1, 1)
+            plot_piechart(self._path+'/res', self._pieax)
+            return self._piefig
+        else:
+            return self._piefig
 
     def save(self, prefix, replace=False):
         if not _check_prefix(prefix):

@@ -10,6 +10,6 @@ RUN pip install -U --user git+https://github.com/GINsim/GINsim-python
 
 RUN conda install -c conda-forge ipywidgets --yes
 
-RUN pip install -U --user git+https://github.com/thenlevy/pyMaBoSS
+COPY maboss /opt/conda/lib/python3.6/site-packages/maboss
 COPY model /model
 COPY notebook /notebook/

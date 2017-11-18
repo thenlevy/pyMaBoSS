@@ -87,16 +87,16 @@ class Network(dict):
         new_ndList = [nd.copy() for nd in self.nodeList]
         new_network = Network(new_ndList)
         new_network._attribution = self._attribution
-        new_network._initState = self._initState
+        new_network._initState = self._initState.copy()
         return new_network
-    
+
     def set_istate(self, nodes, probDict):
         if not (isinstance(nodes, list) or isinstance(nodes, tuple)):
             if not len(probDict) in [1, 2]:
                 print("Error, must provide a list or dictionary of size 1 or 2",
                       file=stderr)
                 return
-            
+
             if (probDict[0] < 0 or probDict[1] < 0
                   or not probDict[0] + probDict[1] == 1):
                 print("Error, bad value for probabilites", file=stderr)
