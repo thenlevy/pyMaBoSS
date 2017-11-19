@@ -28,6 +28,7 @@ def wg_make_mutant(simul):
     def trigger(b):
         for gene in gene_selector.value:
             mutant_simul.mutate(gene, mutation_selector.value)
+        print("Done !")
     ok_button = widgets.Button(description='Ok')
     ok_button.on_click(trigger)
     display(ok_button)
