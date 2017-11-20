@@ -11,7 +11,9 @@ menu = [
     {'name': 'Network',
      'sub-menu': [
          {'name': 'Set istate',
-          'snippet': ["wg_set_istate(master_simulation.network)"]}
+          'snippet': ["wg_set_istate(master_simulation.network)"]},
+         {'name': 'Transfer istates to pint',
+          'snippet': ["wg_transfer_istate(master_simulation.network, model)"]}
      ]},
 
     {'name': 'Simulation',

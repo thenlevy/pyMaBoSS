@@ -24,7 +24,19 @@ def wg_set_istate(network):
         python_code.append("for nd in nodes:\n    master_simulation.network.set_istate(nd, istate)")
         create_code_cell("\n".join(python_code))
         print("Run cell below to validate,"
-              "(you may have to change the network variable)")
+              " (you may have to change the network variable)")
     ok_button = widgets.Button(description='Ok')
     ok_button.on_click(trigger)
     display(ok_button)
+
+def wg_transfer_istate(network, model):
+    for nd in network.keys():
+        states = set()
+        for state in [0, 1]:
+            if network._initState[nd][state]:
+                states.add(state)
+        model.initial_state[nd] = states
+    print(model.initial_state)
+        
+
+    
