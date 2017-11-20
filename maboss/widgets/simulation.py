@@ -23,7 +23,7 @@ def wg_make_mutant(simul):
 
     node_list = list(simul.network.keys())
     gene_selector = widgets.SelectMultiple(options=node_list,
-                                           description='Output')
+                                           description='gene')
     mutation_selector = widgets.Select(options=['ON', 'OFF'],
                                        description='mutation')
     display(gene_selector)
@@ -32,17 +32,16 @@ def wg_make_mutant(simul):
     display(name_input)
     def trigger(b):
         python_code = []
-        arg_gene = str(mutation_selector.value)
+        arg_gene = str(gene_selector.value)
         arg_name = name_input.value
         arg_mut = mutation_selector.value
         python_code.append("genes = {}".format(arg_gene))
         python_code.append("{}_simulation = master_simulation.copy()".format(arg_name))
         python_code.append("for gene in genes:\n"
-                           "    {}_simulation.mutate(gene, {})".format(arg_name,
-                                                                       arg_mut))
+                           "    {}_simulation.mutate(gene, \"{}\")".format(arg_name,
+                                                                           arg_mut))
         create_code_cell("\n".join(python_code))
         print("Run cell below to validate")
     ok_button = widgets.Button(description='Ok')
     ok_button.on_click(trigger)
     display(ok_button)
-    return mutant_simul

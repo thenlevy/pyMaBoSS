@@ -17,7 +17,7 @@ menu = [
     {'name': 'Simulation',
      'sub-menu': [
           {'name': 'Create mutant',
-           'snippet': ["mutant_simulation = maboss.wg_make_mutant(master_simulation)"]},
+           'snippet': ["maboss.wg_make_mutant(master_simulation)"]},
 
           {'name': 'Run',
            'snippet': ["master_results = master_simulation.run()"]},
