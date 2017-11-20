@@ -17,6 +17,11 @@ def get_states(df):
 
 
 def make_plot_table(df):
+    """Creates a table giving the probablilty of each state a every moment.
+
+        The rows are indexed by time points and the columns are indexed by
+        state name.
+    """
     states = get_states(df)
     nb_sates = len(states)
     time_points = np.asarray(df['Time'])
@@ -56,8 +61,10 @@ def plot_piechart(prefix, ax):
     table_file = "{}_probtraj.csv".format(prefix)
     table = pd.read_csv(table_file, "\t")
     plot_table = make_plot_table(table)
-    plot_line = plot_table.iloc[-1].rename("")
+    plot_line = plot_table.iloc[-1].rename("")  # Takes the last time point
+    plot_line = plot_line[plot_line > 0.01]
     plotting_labels = []
+    legend_labels = []
     for value_index, value in enumerate(plot_line):
         if value >= 0.1:
             plotting_labels.append(plot_line.index.values[value_index])
