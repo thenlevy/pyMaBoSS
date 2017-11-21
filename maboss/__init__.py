@@ -12,7 +12,7 @@ if IN_IPYTHON:
 
     jupyter_setup("mymodule",
         label="MaBoSS",
-        color="blue", # for menu and toolbar
+        color="green", # for menu and toolbar
         menu=menu,
         toolbar=toolbar,
         js_api=js_api)
