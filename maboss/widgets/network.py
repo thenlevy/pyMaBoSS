@@ -35,8 +35,5 @@ def wg_transfer_istate(network, model):
         for state in [0, 1]:
             if network._initState[nd][state]:
                 states.add(state)
-        model.initial_state[nd] = states
+        model.initial_state[nd] = states.pop() if len(states) == 1 else states
     print(model.initial_state)
-        
-
-    

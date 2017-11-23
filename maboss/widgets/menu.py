@@ -11,9 +11,9 @@ menu = [
     {'name': 'Network',
      'sub-menu': [
          {'name': 'Set istate',
-          'snippet': ["wg_set_istate(master_simulation.network)"]},
+          'snippet': ["maboss.wg_set_istate(master_simulation.network)"]},
          {'name': 'Transfer istates to pint',
-          'snippet': ["wg_transfer_istate(master_simulation.network, model)"]}
+          'snippet': ["maboss.wg_transfer_istate(master_simulation.network, model)"]}
      ]},
 
     {'name': 'Simulation',
@@ -28,7 +28,7 @@ menu = [
            'snippet': ["master_simulation.network.set_istate([\"mygenelist\"],{})"]},
 
           {'name': 'Set output',
-           'snippet': ["wg_set_output(master_simulation)"]},
+           'snippet': ["maboss.wg_set_output(master_simulation)"]},
 
      ]},
 

@@ -18,6 +18,7 @@ RUN curl -LO https://maboss.curie.fr/pub/MaBoSS-2.0.tgz \
    && ln -s /MaBoSS-2.0/binaries/linux-x86/MaBoSS /bin/MaBoSS
 RUN pip3 install ipywidgets \
     && jupyter nbextension enable --py widgetsnbextension
+RUN pip3 install -U --user git+https://github.com/colomoto/colomoto-jupyter
 RUN pip3 install -U --user git+https://github.com/thenlevy/pyMaBoSS
 COPY model /model
 COPY notebook /notebook/
