@@ -34,6 +34,10 @@ class Simulation(object):
         kwargs : parameters of the simulation
         """
         self.param = _default_parameter_list
+        if 'palette' in kwargs:
+            self.palette = kwargs.pop('palette')
+        else:
+            self.palette = {}
         for p in kwargs:
             if p in _default_parameter_list:
                 self.param[p] = kwargs[p]
@@ -52,7 +56,7 @@ class Simulation(object):
 
     def copy(self):
         new_network = self.network.copy()
-        return Simulation(new_network, **(self.param))
+        return Simulation(new_network, **(self.param), palette=self.palette)
 
     def print_bnd(self, out=stdout):
         print(self.network, file=out)
@@ -108,6 +112,7 @@ class Result(object):
         self._bnd = tempfile.mkstemp(dir=self._path, suffix='.bnd')[1]
         self._trajfig = None
         self._piefig = None
+        self.palette = simul.palette
 
         with ExitStack() as stack:
             bnd_file = stack.enter_context(open(self._bnd, 'w'))
@@ -136,7 +141,7 @@ class Result(object):
     def make_trajectory(self):
         prefix = self._path+'/res'
         self._trajfig, self._trajax = plt.subplots(1, 1)
-        make_plot_trajectory(prefix, self._trajax)
+        make_plot_trajectory(prefix, self._trajax, self.palette)
         return self._trajfig
 
     def plot_piechart(self):
@@ -146,7 +151,7 @@ class Result(object):
                       "returned non 0 value", file=stderr)
                 return
             self._piefig, self._pieax = plt.subplots(1, 1)
-            plot_piechart(self._path+'/res', self._pieax)
+            plot_piechart(self._path+'/res', self._pieax, self.palette)
             return self._piefig
         else:
             return self._piefig
