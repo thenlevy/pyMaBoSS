@@ -83,6 +83,31 @@ def plot_piechart(prefix, ax, palette):
     ax.legend(plot_line.index.values, loc=(0.9, 0.8), fontsize=8)
 
 
+def plot_fix_point(prefix, ax, palette):
+    """Plot a piechart representing the fixed point probability."""
+    table_file = "{}_fp.csv".format(prefix)
+    table = pd.read_csv(table_file, "\t", skiprows=[0])
+    palette['no_fp'] = '#121212'
+    prob_list = []
+    color_list = []
+    labels = []
+    for i in range(len(table)):
+        prob = table['Proba'][i]
+        state = table['State'][i]
+        prob_list.append(prob)
+        add_color(state, color_list, palette)
+        labels.append('FP '+str(i+1))
+    prob_ns = 1 - sum(prob_list)
+    if prob_ns > 0.01:
+        prob_list.append(prob_ns)
+        add_color('no_fp', color_list, palette)
+        labels.append('no_fp')
+    ax.pie(prob_list, labels=labels, colors=color_list)
+    print(table)
+
+
+
+    
 def add_color(state, color_list, palette):
     """Add the color corresponding to state to color_list and update palette."""
     if state in palette:

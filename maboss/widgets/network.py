@@ -23,8 +23,6 @@ def wg_set_istate(network):
         python_code.append('istate = {}'.format(str(istate)))
         python_code.append("for nd in nodes:\n    master_simulation.network.set_istate(nd, istate)")
         create_code_cell("\n".join(python_code))
-        print("Run cell below to validate,"
-              " (you may have to change the network variable)")
     ok_button = widgets.Button(description='Ok')
     ok_button.on_click(trigger)
     display(ok_button)

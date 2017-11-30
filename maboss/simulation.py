@@ -2,7 +2,7 @@
 
 
 from sys import stderr, stdout
-from .figures import make_plot_trajectory, plot_piechart
+from .figures import make_plot_trajectory, plot_piechart, plot_fix_point
 from contextlib import ExitStack
 import os
 import subprocess
@@ -112,6 +112,7 @@ class Result(object):
         self._bnd = tempfile.mkstemp(dir=self._path, suffix='.bnd')[1]
         self._trajfig = None
         self._piefig = None
+        self._fpfig = None
         self.palette = simul.palette
 
         with ExitStack() as stack:
@@ -155,6 +156,17 @@ class Result(object):
             return self._piefig
         else:
             return self._piefig
+
+    def plot_fixpoint(self):
+        if self._fpfig is None:
+            if self._err:
+                print("Error maboss previously returned non 0 value",
+                      file=stderr)
+                return
+            self._fpfig, self._fpax = plt.subplots(1, 1)
+            plot_fix_point(self._path+'/res', self._fpax, self.palette)
+            return self._fpfig
+
 
     def save(self, prefix, replace=False):
         if not _check_prefix(prefix):

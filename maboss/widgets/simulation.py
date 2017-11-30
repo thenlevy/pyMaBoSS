@@ -13,8 +13,6 @@ def wg_set_output(simul):
         arg = str(selector.value)
         python_code = "master_simulation.network.set_output({})".format(arg)
         create_code_cell(python_code)
-        print("Run cell below to validate,"
-              " (you may have to change the network variable)")
     ok_button = widgets.Button(description='Ok')
     ok_button.on_click(trigger)
     display(ok_button)
@@ -41,7 +39,6 @@ def wg_make_mutant(simul):
                            "    {}_simulation.mutate(gene, \"{}\")".format(arg_name,
                                                                            arg_mut))
         create_code_cell("\n".join(python_code))
-        print("Run cell below to validate")
     ok_button = widgets.Button(description='Ok')
     ok_button.on_click(trigger)
     display(ok_button)
