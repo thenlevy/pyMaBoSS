@@ -16,6 +16,7 @@ def create_code_cell(code='', where='below'):
             below"""
     encoded_code = bytes_to_str(base64.b64encode(str_to_bytes(code)))
     display(Javascript("""
-        var code = IPython.notebook.insert_cell_{0}('code');
-        code.set_text(atob("{1}"));
+         var code = Jupyter.notebook.get_selected_cell();
+        code.set_text('#'.concat(code.get_text(),'\\n', atob("{1}")));
+        Jupyter.notebook.execute_cell_and_select_below();
     """.format(where, encoded_code)))
