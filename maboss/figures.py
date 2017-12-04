@@ -6,44 +6,14 @@ import matplotlib.pylab as plt
 import numpy as np
 
 
-def get_states(df):
-    cols = list(filter(lambda s: s.startswith("State"), df.columns))
-    states = set()
-    for i in df.index:
-        for c in cols:
-            if type(df[c][i]) is str:  # Otherwise it is nan
-                states.add(df[c][i])
-    return states
 
 
-def make_plot_table(df):
-    """Creates a table giving the probablilty of each state a every moment.
-
-        The rows are indexed by time points and the columns are indexed by
-        state name.
-    """
-    states = get_states(df)
-    nb_sates = len(states)
-    time_points = np.asarray(df['Time'])
-    time_table = pd.DataFrame(np.zeros((len(time_points), nb_sates)),
-                              index=time_points, columns=states)
-
-    cols = list(filter(lambda s: s.startswith("State"), df.columns))
-    for i in df.index:
-        tp = df["Time"][i]
-        for c in cols:
-            prob_col = c.replace("State", "Proba")
-            if type(df[c][i]) is str:  # Otherwise it is nan
-                state = df[c][i]
-                time_table[state][tp] = df[prob_col][i]
-
-    return time_table
 
 
 def make_plot_trajectory(prefix, ax, palette):
     table_file = "{}_probtraj.csv".format(prefix)
     df = pd.read_csv(table_file, "\t")
-    time_table = make_plot_table(df)
+    time_table = make_trajectory_table(df)
     color_list = []
     for idx in time_table.index.values:
         add_color(idx, color_list, palette)
@@ -54,7 +24,7 @@ def make_plot_trajectory(prefix, ax, palette):
 def make_trajectory(prefix, palette):
     table_file = "{}_probtraj.csv".format(prefix)
     table = pd.read_csv(table_file, "\t")
-    plot_table = make_plot_table(table)
+    time_table = make_trajectory_table(table)
     color_list = []
     for idx in time_table.index.values:
         add_color(idx, color_list, palette)
@@ -63,10 +33,21 @@ def make_trajectory(prefix, palette):
     plt.show()
 
 
+def plot_node_prob(prefix, ax, palette):
+    """Plot the probability of each node being up over time."""
+    table_file = "{}_probtraj.csv".format(prefix)
+    table = pd.read_csv(table_file, "\t")
+    time_table = make_node_proba_table(table)
+    color_list = []
+    for idx in time_table.index.values:
+        add_color(idx, color_list, palette)
+    time_table.plot(ax=ax, color=color_list)
+
+
 def plot_piechart(prefix, ax, palette):
     table_file = "{}_probtraj.csv".format(prefix)
     table = pd.read_csv(table_file, "\t")
-    plot_table = make_plot_table(table)
+    plot_table = make_trajectory_table(table)
     plot_line = plot_table.iloc[-1].rename("")  # Takes the last time point
     plot_line = plot_line[plot_line > 0.01]
     plotting_labels = []
@@ -107,6 +88,7 @@ def plot_fix_point(prefix, ax, palette):
 
 
 
+
     
 def add_color(state, color_list, palette):
     """Add the color corresponding to state to color_list and update palette."""
@@ -117,3 +99,68 @@ def add_color(state, color_list, palette):
         color = 'C' + str(n)
         palette[state] = color
         color_list.append(color)
+
+
+def make_trajectory_table(df):
+    """Creates a table giving the probablilty of each state a every moment.
+
+        The rows are indexed by time points and the columns are indexed by
+        state name.
+    """
+    states = get_states(df)
+    nb_sates = len(states)
+    time_points = np.asarray(df['Time'])
+    time_table = pd.DataFrame(np.zeros((len(time_points), nb_sates)),
+                              index=time_points, columns=states)
+
+    cols = list(filter(lambda s: s.startswith("State"), df.columns))
+    for i in df.index:
+        tp = df["Time"][i]
+        for c in cols:
+            prob_col = c.replace("State", "Proba")
+            if type(df[c][i]) is str:  # Otherwise it is nan
+                state = df[c][i]
+                time_table[state][tp] = df[prob_col][i]
+
+    return time_table
+
+
+def make_node_proba_table(df):
+    """Same as make_trajectory_table but with nodes instead of states."""
+    nodes = get_nodes(df)
+    nb_nodes = len(nodes)
+    time_points = np.asarray(df['Time'])
+    time_table = pd.DataFrame(np.zeros((len(time_points), nb_nodes)),
+                              index=time_points, columns=nodes)
+    cols = list(filter(lambda s: s.startswith("State"), df.columns))
+    for i in df.index:
+        tp = df["Time"][i]
+        for c in cols:
+            prob_col = c.replace("State", "Proba")
+            if type(df[c][i]) is str:
+                state = df[c][i]
+                if ' -- ' in state:
+                    nodes = state.split(' -- ')
+                else:
+                    nodes = [state]
+                for nd in nodes:
+                    time_table[nd][tp] += df[prob_col][i]
+    return time_table
+    
+def get_nodes(df):
+    states = get_states(df)
+    nodes = set()
+    for s in states:
+        nds = s.split(' -- ')
+        for nd in nds:
+            nodes.add(nd)
+    return nodes
+        
+def get_states(df):
+    cols = list(filter(lambda s: s.startswith("State"), df.columns))
+    states = set()
+    for i in df.index:
+        for c in cols:
+            if type(df[c][i]) is str:  # Otherwise it is nan
+                states.add(df[c][i])
+    return states

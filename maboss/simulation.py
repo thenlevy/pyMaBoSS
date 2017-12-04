@@ -2,7 +2,7 @@
 
 
 from sys import stderr, stdout
-from .figures import make_plot_trajectory, plot_piechart, plot_fix_point
+from .figures import make_plot_trajectory, plot_piechart, plot_fix_point, plot_node_prob
 from contextlib import ExitStack
 import os
 import subprocess
@@ -113,6 +113,7 @@ class Result(object):
         self._trajfig = None
         self._piefig = None
         self._fpfig = None
+        self._ndtraj = None
         self.palette = simul.palette
 
         with ExitStack() as stack:
@@ -153,9 +154,7 @@ class Result(object):
                 return
             self._piefig, self._pieax = plt.subplots(1, 1)
             plot_piechart(self._path+'/res', self._pieax, self.palette)
-            return self._piefig
-        else:
-            return self._piefig
+        return self._piefig
 
     def plot_fixpoint(self):
         if self._fpfig is None:
@@ -165,7 +164,18 @@ class Result(object):
                 return
             self._fpfig, self._fpax = plt.subplots(1, 1)
             plot_fix_point(self._path+'/res', self._fpax, self.palette)
-            return self._fpfig
+        return self._fpfig
+
+    def plot_node_trajectory(self):
+        if self._ndtraj is None:
+            if self._err:
+                print("Error maboss previously returned non 0 value",
+                      file=stderr)
+                return
+            self._ndtraj, self._ndtrajax = plt.subplots(1, 1)
+            plot_node_prob(self._path+'/res', self._ndtrajax, self.palette)
+        return self._ndtraj
+
 
 
     def save(self, prefix, replace=False):
