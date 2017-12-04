@@ -18,22 +18,11 @@ externVar.setParseAction(lambda token: token[0])
 # ====================
 # bnd grammar
 # ====================
-logDecl = pp.Suppress("logic =") + logExp + pp.Suppress(';')
-logDecl.setParseAction(lambda token: token[0])
-rt_up_decl = (pp.Suppress("rate_up") + pp.Suppress('=') + pp.Suppress('@logic')
-              + pp.Suppress('?') + externVar + pp.Suppress(':')
-              + pp.Suppress('0') + pp.Suppress(';'))
-
-rt_down_decl = (pp.Suppress("rate_down") + pp.Suppress('=')
-                + pp.Suppress('@logic') + pp.Suppress('?') + pp.Suppress('0')
-                + pp.Suppress(':') + externVar + pp.Suppress(';'))
-rt_up_decl.setParseAction(lambda token: token[0])
-rt_down_decl.setParseAction(lambda token: token[0])
-
+internal_var_decl = pp.Group(varName('lhs') + pp.Suppress('=')
+                             + pp.SkipTo(';')('rhs') + pp.Suppress(';'))
 node_decl = pp.Group(pp.Suppress("Node") + varName("name") + pp.Suppress('{')
-                     + logDecl("logic") + rt_up_decl("rate_up")
-                     + rt_down_decl("rate_down") + pp.Suppress('}'))
-
+                     + pp.OneOrMore(internal_var_decl)('interns')
+                     + pp.Suppress('}'))
 bnd_grammar = pp.OneOrMore(node_decl)
 
 # =====================
@@ -99,11 +88,14 @@ def build_network(prefix):
         (variables, parameters, is_internal_list,
          istate_list) = _read_cfg(cfg_content)
 
-        nodes = _read_bnd(bnd_content, variables, is_internal_list)
+        nodes = _read_bnd(bnd_content, is_internal_list)
 
         net = Network(nodes)
         for istate in istate_list:
             net.set_istate(istate, istate_list[istate])
+        for v in variables:
+            lhs = '$'+v
+            parameters[lhs] = variables[v]
         return Simulation(net, **parameters)
 
 
@@ -140,7 +132,7 @@ def _read_cfg(string):
                 # TODO check if lens are consistent
                 if len(token.nodes) == 1:
                     istate_list[token.nodes[0]] = {int(t[1][0]): t[0]
-                                                for t in token.attrib}
+                                                   for t in token.attrib}
                 else:
                     nodes = tuple(token.nodes)
                     istate_list[nodes] = {tuple(t[1]): t[0]
@@ -149,26 +141,18 @@ def _read_cfg(string):
         return (variables, parameters, is_internal_list, istate_list)
 
 
-def _read_bnd(string, variables, is_internal_list):
+def _read_bnd(string, is_internal_list):
         nodes = []
         parse_bnd = bnd_grammar.parseString(string)
         for token in parse_bnd:
-            rate_up = token.rate_up
-            if type(rate_up) is str:
-                if rate_up not in variables:
-                    print("Error unknown variable %s" % rate_up, file=stderr)
-                    return
-                rate_up = float(variables[rate_up])
-            rate_down = token.rate_down
-            if type(rate_down) is str:
-                if rate_down not in variables:
-                    print("Error unknown variable %s" % rate_down, file=stderr)
-                    return
-                rate_down = float(variables[rate_down])
+            interns = {v.lhs: v.rhs for v in token.interns}
+            logic = interns.pop('logic')
+            rate_up = interns.pop('rate_up')
+            rate_down = interns.pop('rate_down')
 
             internal = (is_internal_list[token.name]
                         if token.name in is_internal_list
                         else False)
-            nodes.append(Node(token.name, token.logic, rate_up, rate_down,
-                              internal))
+            nodes.append(Node(token.name, logic, rate_up, rate_down,
+                              internal, interns))
         return nodes

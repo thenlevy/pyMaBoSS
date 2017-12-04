@@ -18,7 +18,8 @@ class Node(object):
     value 0 and rate_down the value rt_down.
     """
 
-    def __init__(self, name, logExp=None, rt_up=1, rt_down=1, is_internal=False):
+    def __init__(self, name, logExp=None, rt_up=1, rt_down=1,
+                 is_internal=False, internal_var={}):
         """
         Create a node not yet inserted in a network.
 
@@ -27,17 +28,15 @@ class Node(object):
         """
         self.name = name
         self.set_logic(logExp)
-        self.set_rate(rt_up, rt_down)
+        self.rt_up = rt_up
+        self.rt_down = rt_down
         self.is_internal = is_internal
+        self.internal_var = internal_var.copy()
 
     def set_rate(self, rate_up, rate_down):
         """Set the value of rate_up and rate_down."""
-        if rate_up < 0 or rate_down < 0:
-            print("Error, rates must be nonnegative", file=stderr)
-            print("Rates were not modified", file=stderr)
-            return
-        self.rt_up = rate_up
-        self.rt_down = rate_down
+        self.rt_up = "@logic ? " + rate_up + " : 0"
+        self.rt_down = "@logic ? 0 : " + rate_down
 
     def set_logic(self, string):
         """Set logExp to str if str is a valid boolean expression."""
@@ -48,13 +47,12 @@ class Node(object):
             print("logExp set to None", file=stderr)
             self.logExp = None
 
-
     def __str__(self):
         return _strNode(self)
 
     def copy(self):
         return Node(self.name, self.logExp, self.rt_up, self.rt_down,
-                    self.is_internal)
+                    self.is_internal, self.internal_var)
 
 
 class Network(dict):
@@ -147,16 +145,15 @@ def _testStateDict(stDict, nbState):
     def goodTuple(t):
         return len(t) == nbState and all(x == 0 or x == 1 for x in t)
 
-
     if (not all(isinstance(t, tuple) for t in stDict)
-        or not all(goodTuple(t) for t in stDict)):
-        print("Error, not all keys are good tuples of length %s" %nbState,
+       or not all(goodTuple(t) for t in stDict)):
+        print("Error, not all keys are good tuples of length %s" % nbState,
               file=stderr)
         return False
     elif (not all(x >= 0 for x in stDict.values())
           or not sum(stDict.values()) == 1):
         print("Error, the given values must be nonegative and sum up to 1",
-              file =stderr)
+              file=stderr)
         return False
     else:
         return True
@@ -166,12 +163,13 @@ def _strNode(nd):
     string = ""
     rt_up_str = str(nd.rt_up)
     rt_down_str = str(nd.rt_down)
+    internal_var_decl = "\n".join(map(lambda v: v+" = " + nd.internal_var[v],
+                                      nd.internal_var.keys()))
     string = "\n".join(["Node " + nd.name + " {",
+                        internal_var_decl,
                         "\tlogic = " + nd.logExp + ";",
-                        ("\trate_up = @logic ? " + rt_up_str
-                            + " : 0;"),
-                        ("\trate_down = @logic ? 0 : "
-                            + rt_down_str + ";"),
+                        ("\trate_up = " + rt_up_str + ";"),
+                        ("\trate_down = " + rt_down_str + ";"),
                         "}"])
     return string
 
@@ -179,8 +177,8 @@ def _strNode(nd):
 def _strNetwork(nt):
     string = _strNode(nt.nodeList[0])
     if len(nt.nodeList) > 1:
-       string += "\n"
-       string += "\n\n".join(_strNode(nd) for nd in nt.nodeList[1:])
+        string += "\n"
+        string += "\n\n".join(_strNode(nd) for nd in nt.nodeList[1:])
     return string
 
 
@@ -191,7 +189,7 @@ def _str_istateList(isl):
         if isinstance(binding, tuple):
             string += '[' + ", ".join(list(binding)) + '].istate = '
             string += ' , '.join([str(isl[binding][t]) + ' '
-                                    + str(list(t)) for t in isl[binding]])
+                                  + str(list(t)) for t in isl[binding]])
             string += ';'
         else:
             string += '[' + binding + '].istate = '

@@ -39,7 +39,7 @@ class Simulation(object):
         else:
             self.palette = {}
         for p in kwargs:
-            if p in _default_parameter_list:
+            if p in _default_parameter_list or p[0] == '$':
                 self.param[p] = kwargs[p]
             else:
                 print("Warning: unused parameter %s" % p, file=stderr)
@@ -49,7 +49,7 @@ class Simulation(object):
 
     def update_parameters(self, **kwargs):
         for p in kwargs:
-            if p in _default_parameter_list:
+            if p in _default_parameter_list or p[0] == '$':
                 self.param[p] = kwargs[p]
             else:
                 print("Warning: unused parameter %s" % p, file=stderr)
@@ -62,14 +62,15 @@ class Simulation(object):
         print(self.network, file=out)
 
     def print_cfg(self, out=stdout):
-        for nd in self.network.nodeList:
-            print("$u_" + nd.name + " = " + str(nd.rt_up) + ';', file=out)
-            print("$d_" + nd.name + " = " + str(nd.rt_down) + ';', file=out)
+        for p in self.param:
+            if p[0] == '$':
+                print(p + ' = ' + str(self.param[p]) + ';', file=out)
         self.network.print_istate(out=out)
         print('', file=out)
 
         for p in self.param:
-            print(p + ' = ' + str(self.param[p]) + ';', file=out)
+            if p[0] != '$':
+                print(p + ' = ' + str(self.param[p]) + ';', file=out)
 
         for nd in self.network.nodeList:
             string = nd.name+'.is_internal = ' + str(int(nd.is_internal)) + ';'
