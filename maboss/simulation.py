@@ -10,6 +10,7 @@ import tempfile
 import shutil
 import pyparsing as pp
 import matplotlib.pyplot as plt
+import pandas as pd
 
 _default_parameter_list = {'time_tick': 0.1,
                   'max_time': 4,
@@ -116,6 +117,7 @@ class Result(object):
         self._fpfig = None
         self._ndtraj = None
         self.palette = simul.palette
+        self.fptable = None
 
         with ExitStack() as stack:
             bnd_file = stack.enter_context(open(self._bnd, 'w'))
@@ -164,7 +166,7 @@ class Result(object):
                       file=stderr)
                 return
             self._fpfig, self._fpax = plt.subplots(1, 1)
-            plot_fix_point(self._path+'/res', self._fpax, self.palette)
+            plot_fix_point(self.get_fptable(), self._fpax, self.palette)
         return self._fpfig
 
     def plot_node_trajectory(self):
@@ -176,6 +178,12 @@ class Result(object):
             self._ndtraj, self._ndtrajax = plt.subplots(1, 1)
             plot_node_prob(self._path+'/res', self._ndtrajax, self.palette)
         return self._ndtraj
+
+    def get_fptable(self): 
+        if self.fptable is None:
+            table_file = "{}/res_fp.csv".format(self._path)
+            self.fptable = pd.read_csv(table_file, "\t", skiprows=[0])
+        return self.fptable
 
 
 
