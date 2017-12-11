@@ -19,7 +19,7 @@ class Node(object):
     """
 
     def __init__(self, name, logExp=None, rt_up=1, rt_down=1,
-                 is_internal=False, internal_var={}):
+                 is_internal=False, internal_var={}, is_mutant=False):
         """
         Create a node not yet inserted in a network.
 
@@ -32,6 +32,7 @@ class Node(object):
         self.rt_down = rt_down
         self.is_internal = is_internal
         self.internal_var = internal_var.copy()
+        self.is_mutant=is_mutant
 
     def set_rate(self, rate_up, rate_down):
         """Set the value of rate_up and rate_down."""
@@ -175,10 +176,11 @@ def _strNode(nd):
 
 
 def _strNetwork(nt):
-    string = _strNode(nt.nodeList[0])
-    if len(nt.nodeList) > 1:
+    ndList = list(nt.values())
+    string = _strNode(ndList[0])
+    if len(ndList) > 1:
         string += "\n"
-        string += "\n\n".join(_strNode(nd) for nd in nt.nodeList[1:])
+        string += "\n\n".join(_strNode(nd) for nd in ndList[1:])
     return string
 
 

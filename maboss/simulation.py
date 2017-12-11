@@ -40,7 +40,7 @@ class Simulation(object):
                 print("Warning: unused parameter %s" % p, file=stderr)
 
         self.network = nt
-        self._mutations = {}
+        self.mutations = []
 
     def update_parameters(self, **kwargs):
         for p in kwargs:
@@ -83,20 +83,47 @@ class Simulation(object):
             print("Error, unknown node %s" % node, file=stderr)
             return
 
+        nd = self.network[node]
+        if not nd.is_mutant:
+            self.network[node]=_make_mutant_node(nd)
+            
+            
+        
+        lowvar = "$Low_"+node
+        highvar = "$High_"+node
         if state == "ON":
-            self.network.set_istate(node, [0, 1])
-            self.network[node].set_rate(1, 0)
+            self.param[lowvar] = 0
+            self.param[highvar] = 1
+            
 
         elif state == "OFF":
-            self.network.set_istate(node, [1, 0])
-            self.network[node].set_rate(0, 1)
+            self.param[lowvar] = 1
+            self.param[highvar] = 0
 
         elif state == "WT":
-            self.network.set_istate(node, [0.5, 0.5])
-            self.network[node].set_rate(1, 1)
+            self.param[lowvar] = 0
+            self.param[highvar] = 0
 
         else:
-            print("Error, state must be ON, OFF, or WT", file=stderr)
+            print("Error, state must be ON, OFF or WT", file=stderr)
             return
 
 
+def _make_mutant_node(nd):
+    """Create a new logic for mutation that can be activated from .cfg file."""
+    curent_rt_up = nd.rt_up
+    curent_rt_down = nd.rt_down
+
+    lowvar = "$Low_"+nd.name
+    highvar = "$High_"+nd.name
+    rt_up = (lowvar+" ? 0 : (" + highvar + " ? 1E100 : ("
+             + curent_rt_up + "))")
+    rt_down = (highvar + " ? 0 : (" + lowvar + " ? 1E100 : ("
+             + curent_rt_down + "))")
+    # Once this is done, the mutation can be activated by modifying the value
+    # of $Low_nodename and $High_nodename in the .cfg file
+    newNode = nd.copy()
+    newNode.rt_up = rt_up
+    newNode.rt_down = rt_down
+    newNode.is_mutant = True
+    return newNode
