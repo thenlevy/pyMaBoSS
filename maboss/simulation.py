@@ -108,6 +108,19 @@ class Simulation(object):
             print("Error, state must be ON, OFF or WT", file=stderr)
             return
 
+    def copy_results(self, result):
+        """Produce a new simulation where the initial state is the last state from result."""
+        new_sim = self.copy()
+        node_prob = result.get_nodes_probtraj()
+        nodes = node_prob.iloc[-1]
+        for i in nodes.index:
+            if i != "<nil>":
+                prob = nodes[i]
+                new_sim.network.set_istate(i, [1 - prob, prob])
+        return new_sim
+
+
+
 
 def _make_mutant_node(nd):
     """Create a new logic for mutation that can be activated from .cfg file."""
