@@ -4,8 +4,13 @@ import ipywidgets as widgets
 from IPython import get_ipython
 from .code_cell import create_code_cell
 import ast
+from .. import simulations
 
-def wg_set_istate(network):
+def wg_set_istate(simul):
+    if type(simul) is str:
+        simul = simulations[simul]
+    
+    network = simul.network
     node_list = list(network.keys())
     selector = widgets.SelectMultiple(options=node_list, description='Nodes')
     display(selector)
@@ -19,9 +24,10 @@ def wg_set_istate(network):
         elif istate == 0:
             istate = [1, 0]
         python_code=[]
+        python_code.append('simul = maboss.simulations[\"{}\"]'.format(simul.name))
         python_code.append('nodes = {}'.format(str(selector.value)))
         python_code.append('istate = {}'.format(str(istate)))
-        python_code.append("for nd in nodes:\n    master_simulation.network.set_istate(nd, istate)")
+        python_code.append("for nd in nodes:\n    simul.network.set_istate(nd, istate)")
         create_code_cell("\n".join(python_code))
     ok_button = widgets.Button(description='Ok')
     ok_button.on_click(trigger)

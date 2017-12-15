@@ -6,12 +6,12 @@ menu = [
     {'name': 'Load network (zginml format)',
      'snippet': ["m = ginsim.open(\"myModel.zginml\")",
                  "ginsim.service(\"maboss\").export(m, \"mybndfile.bnd\")",
-                 "master_simulation = maboss.load_file(\"mybndfile.bnd\")"]},
+                 "master_simulation = maboss.load_file(\"mybndfile.bnd\", simulation_name=\"master\")"]},
 
     {'name': 'Network',
      'sub-menu': [
          {'name': 'Set istate',
-          'snippet': ["maboss.wg_set_istate(master_simulation.network)"]},
+          'snippet': ["maboss.wg_set_istate(\"master\")"]},
          {'name': 'Transfer istates to pint',
           'snippet': ["maboss.wg_transfer_istate(master_simulation.network, model)"]}
      ]},

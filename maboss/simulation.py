@@ -20,8 +20,10 @@ _default_parameter_list = {'time_tick': 0.1,
                   }
 
 
+simulations = {}  # global maping of simulation names to simulation object
+
 class Simulation(object):
-    def __init__(self, nt, **kwargs):
+    def __init__(self, nt, name, **kwargs):
         """
         Initialize the Simulation object.
 
@@ -41,6 +43,11 @@ class Simulation(object):
 
         self.network = nt
         self.mutations = []
+        self.name = name
+        if name in simulations:
+            print("Error simulation %s already exists" % name, file=stderr)
+        else:
+            simulations[name] = self
 
     def update_parameters(self, **kwargs):
         for p in kwargs:
@@ -49,14 +56,15 @@ class Simulation(object):
             else:
                 print("Warning: unused parameter %s" % p, file=stderr)
 
-    def copy(self):
+    def copy(self, copy_name):
         new_network = self.network.copy()
-        return Simulation(new_network, **(self.param), palette=self.palette)
+        return Simulation(new_network, copy_name, **(self.param), palette=self.palette)
 
     def print_bnd(self, out=stdout):
         print(self.network, file=out)
 
     def print_cfg(self, out=stdout):
+        print("$nb_mutable = " + str(len(self.mutations)) + ";", file=out)
         for p in self.param:
             if p[0] == '$':
                 print(p + ' = ' + str(self.param[p]) + ';', file=out)
@@ -75,7 +83,7 @@ class Simulation(object):
         """Run the simulation with MaBoSS and return a Result object.
         """
 
-        return Result(self, save, prefix)
+        return Result(self, save, prefix, self.name)
 
 
     def mutate(self, node, state):
@@ -108,9 +116,9 @@ class Simulation(object):
             print("Error, state must be ON, OFF or WT", file=stderr)
             return
 
-    def copy_results(self, result):
+    def copy_results(self, result, copy_name):
         """Produce a new simulation where the initial state is the last state from result."""
-        new_sim = self.copy()
+        new_sim = self.copy(copy_name)
         node_prob = result.get_nodes_probtraj()
         nodes = node_prob.iloc[-1]
         for i in nodes.index:
@@ -119,8 +127,8 @@ class Simulation(object):
                 new_sim.network.set_istate(i, [1 - prob, prob])
         return new_sim
 
-
-
+def run_simulation(name):
+    return simulations[name].run()
 
 def _make_mutant_node(nd):
     """Create a new logic for mutation that can be activated from .cfg file."""
@@ -129,9 +137,9 @@ def _make_mutant_node(nd):
 
     lowvar = "$Low_"+nd.name
     highvar = "$High_"+nd.name
-    rt_up = (lowvar+" ? 0 : (" + highvar + " ? 1E100 : ("
+    rt_up = (lowvar+" ? 0 : (" + highvar + " ? 1E308/$nb_mutable : ("
              + curent_rt_up + "))")
-    rt_down = (highvar + " ? 0 : (" + lowvar + " ? 1E100 : ("
+    rt_down = (highvar + " ? 0 : (" + lowvar + " ? 1E308/$nb_mutable : ("
              + curent_rt_down + "))")
     # Once this is done, the mutation can be activated by modifying the value
     # of $Low_nodename and $High_nodename in the .cfg file
@@ -140,3 +148,4 @@ def _make_mutant_node(nd):
     newNode.rt_down = rt_down
     newNode.is_mutant = True
     return newNode
+

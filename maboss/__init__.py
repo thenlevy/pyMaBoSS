@@ -1,6 +1,6 @@
 from .network import Node, Network
-from .simulation import Simulation
-from .result import Result
+from .simulation import Simulation, simulations
+from .result import Result, results
 from .gsparser import build_network, load_file
 
 
@@ -17,3 +17,4 @@ if IN_IPYTHON:
         menu=menu,
         toolbar=toolbar,
         js_api=js_api)
+

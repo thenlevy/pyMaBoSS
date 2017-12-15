@@ -12,9 +12,10 @@ from contextlib import ExitStack
 import os
 import subprocess
 
+results = {}  # global maping of results name to results objects
 class Result(object):
 
-    def __init__(self, simul, save, prefix):
+    def __init__(self, simul, save, prefix, name):
         self._path = tempfile.mkdtemp()
         self._cfg = tempfile.mkstemp(dir=self._path, suffix='.cfg')[1]
         self._bnd = tempfile.mkstemp(dir=self._path, suffix='.bnd')[1]
@@ -26,6 +27,10 @@ class Result(object):
         self.fptable = None
         self.state_probtraj = None
         self.nd_probtraj = None
+        if name in results:
+            print("Error result % already exists" % name, file=stderr)
+        else:
+            results[name] = self
 
         with ExitStack() as stack:
             bnd_file = stack.enter_context(open(self._bnd, 'w'))

@@ -67,7 +67,7 @@ cfg_grammar = pp.ZeroOrMore(cfg_decl)
 cfg_grammar.ignore('//' + pp.restOfLine)
 
 
-def build_network(prefix):
+def build_network(prefix, simulation_name):
     """Read prefix.bnd and prefix.cfg and build the corresponding Network."""
     cfg_filename = prefix + '.cfg'
     if not isfile(cfg_filename):
@@ -96,15 +96,15 @@ def build_network(prefix):
         for v in variables:
             lhs = '$'+v
             parameters[lhs] = variables[v]
-        return Simulation(net, **parameters)
+        return Simulation(net, simulation_name, **parameters)
 
 
-def load_file(filename):
+def load_file(filename, simulation_name):
     """Loads a network from a MaBoSS format file."""
 
     if filename.endswith(".cfg") or filename.endswith(".bnd"):
         filename = filename[:-4]
-        return build_network(filename)
+        return build_network(filename, simulation_name)
     else:
         print("Error, filename must end with .bnd or .cfg", file=stderr)
         return
