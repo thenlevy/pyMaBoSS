@@ -23,6 +23,21 @@ _default_parameter_list = {'time_tick': 0.1,
 simulations = {}  # global maping of simulation names to simulation object
 
 class Simulation(object):
+    """
+    Class that handles MaBoSS simulations.
+
+    It conatins several attributes:
+    network, a Network object, that will be translated in a bnd file
+    mutations, a list of nodes for which mutation can be triggered by
+      modifying the cfg file
+    palette, a mapping of nodes to color for plotting the results of 
+      the simulation.
+    param, a dictionary that contains global variables (keys starting with a '$'),
+      and simulation parameters (keys not starting with a '$').
+
+    """
+
+    
     def __init__(self, nt, name, **kwargs):
         """
         Initialize the Simulation object.
@@ -50,6 +65,7 @@ class Simulation(object):
             simulations[name] = self
 
     def update_parameters(self, **kwargs):
+        """Add alement to the self.param."""
         for p in kwargs:
             if p in _default_parameter_list or p[0] == '$':
                 self.param[p] = kwargs[p]
@@ -61,9 +77,11 @@ class Simulation(object):
         return Simulation(new_network, copy_name, **(self.param), palette=self.palette)
 
     def print_bnd(self, out=stdout):
+        """Print the content of the bnd file associated to the simulation."""
         print(self.network, file=out)
 
     def print_cfg(self, out=stdout):
+        """Print the content of the cfg file associated to the simulation."""
         print("$nb_mutable = " + str(len(self.mutations)) + ";", file=out)
         for p in self.param:
             if p[0] == '$':
@@ -87,6 +105,19 @@ class Simulation(object):
 
 
     def mutate(self, node, state):
+        """
+        Trigger or untrigger mutation for a node.
+        
+        State can be 'ON' (always up) 'OFF' (always down) or 'WT' (mutable node
+        but with normal behaviour)
+
+        The node will appear as a mutable node in the bnd file.
+        This means that its rate will be of the form:
+        rate_up = $LowNode ? 0 :($HighNode ? 1: (@logic ? rt_up : 0))
+        
+        If the node is already mutable, this method will simply set $HighNode
+        and $LowNode accordingly to the desired mutation.
+        """
         if node not in self.network:
             print("Error, unknown node %s" % node, file=stderr)
             return

@@ -9,13 +9,15 @@ class Node(object):
     Represent a node of a boolean network.
 
     name :: str, the name of the node
-    rt_up :: double >= 0
-    rt_down :: double >= 0
-    logExp :: str, a boolean expression.
-
-    when logic evaluates to true, rate_up will take the value rt_up and
-    rate_down take the value 0, when logic evaluates to Fales, rate_up take the
-    value 0 and rate_down the value rt_down.
+    rt_up :: str, an expression that will be evaluated by MaBoSS to determine
+    the probability of the node to switch from down to up
+    rt_down :: str, similar to rt_up but determine the probability to go from up
+    to down
+    logExp :: str, the value that will be attributed to the internal node
+    variable @logic in the bnd file
+    
+    Node objects have a __str__ method that prints their representation in the
+    MaBoSS language.
     """
 
     def __init__(self, name, logExp=None, rt_up=1, rt_down=1,
@@ -25,6 +27,11 @@ class Node(object):
 
         logic, rt_up and rt_down are optional when creating the node but
         must be set before making a network.
+        
+        The is_internal attribute determines wether a node will appear in the 
+        MaBoSS output or not.
+        
+        internal_var is a dictionary of the node's internal variables.
         """
         self.name = name
         self.set_logic(logExp)
@@ -35,7 +42,15 @@ class Node(object):
         self.is_mutant=is_mutant
 
     def set_rate(self, rate_up, rate_down):
-        """Set the value of rate_up and rate_down."""
+        """
+        Set the value of rate_up and rate_down.
+        
+        rate_up :: double
+        rate_down :: double
+        This function will write a simple formula of the form 
+        rate_up = @logic ? rt_up : 0 ;
+        rate_down = @logic ? 0 : rt_down ;
+        """
         self.rt_up = "@logic ? " + rate_up + " : 0"
         self.rt_down = "@logic ? 0 : " + rate_down
 
@@ -62,6 +77,8 @@ class Network(dict):
 
     Initialised with a list of Nodes whose logExp must contain only names
     present in the list.
+    
+    Network objetcs are in charge of carrying the initial states of each node.
     """
 
     def __init__(self, nodeList):
@@ -90,6 +107,21 @@ class Network(dict):
         return new_network
 
     def set_istate(self, nodes, probDict):
+        """
+        Change the inital states probability of one or several nodes.
+
+        If nodes is a Node object or a singleton, probDict must be a probability
+        distribution over {0, 1}, it can be expressed by a list [P(0), P(1)] or a
+        dictionary: {0: P(0), 1: P(1)}.
+
+        If nodes is a tuple or a list of several Node objects, the Node object 
+        will be bound, and probDict must be a probability distribution over a part
+        of {0, 1}^n. It must be expressed in the form of a dictionary
+        {(b1, ..., bn): P(b1,..,bn),...}. States that do not appear in the 
+        dictionary will be considered to be impossible. If a state has a 0 probability of
+        being an intial state but might be reached later, it must explicitly appear 
+        as a key in probDict.
+        """
         if not (isinstance(nodes, list) or isinstance(nodes, tuple)):
             if not len(probDict) in [1, 2]:
                 print("Error, must provide a list or dictionary of size 1 or 2",

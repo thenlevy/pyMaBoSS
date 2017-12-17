@@ -14,6 +14,20 @@ import subprocess
 
 results = {}  # global maping of results name to results objects
 class Result(object):
+    """
+    Class that handles the results of MaBoSS simulation.
+    
+    When a Resut object is created, two temporary files are written in /tmp/
+    these files are the .bnd and .cfg file represented by the associated
+    Simulation object. MaBoSS is then executed on these to temporary files and
+    its output are stored in a temporary folder. 
+    The Result object has several attributes to access the contents of the
+    folder as pandas dataframe. It also has methods to produce somme plots.
+
+    By default, the cfg, bnd and MaBoSS output are removed from the disk when the
+    Result object is destructed. Result object has a method to save cfg, bnd and results
+    in the working directory.
+    """
 
     def __init__(self, simul, save, prefix, name):
         self._path = tempfile.mkdtemp()
@@ -116,6 +130,13 @@ class Result(object):
         return self.state_probtraj
 
     def save(self, prefix, replace=False):
+        """
+        Write the cfg, bnd and all results in working dir.
+
+        prefix is a string that will determine the name of the created files.
+        If there is a conflict with existing files, the existing files will be
+        replaced or not, depending on the value of the replace argument.
+        """
         if not _check_prefix(prefix):
             return
 
