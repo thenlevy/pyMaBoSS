@@ -5,7 +5,8 @@
 !test/reprod_all.cfg
 *~
 \#*\#
-*/__pycache__
+__pycache__
 *.txt
 dist
 build
+*.egg-info
