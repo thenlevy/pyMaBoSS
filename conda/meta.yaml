@@ -1,0 +1,31 @@
+{% set name = "pyMaBoSS" %}
+{% set version = "0.3.2" %}
+package:
+  name: '{{ name|lower }}'
+  version: '{{ version }}'
+
+source:
+  url: https://github.com/thenlevy/pyMaBoSS/archive/v{{ version }}.tar.gz
+
+channels:
+  - colomoto
+
+build:
+  number: 0
+  script: python setup.py install --single-version-externally-managed --record=record.txt
+  noarch: python
+
+requirements:
+  build:
+    - python
+    - setuptools
+
+  run:
+    - python
+    - colomoto_jupyter
+    - maboss
+
+about:
+  home: https://github.com/thenlevy/pyMaBoSS
+  summary: 'MaBoSS python interface'
+
