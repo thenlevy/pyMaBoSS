@@ -1,10 +1,15 @@
-"""Class that handles the parameters of a MaBoSS simulation."""
+"""Class that handles the parameters of a MaBoSS simulation.
+
+When this module is imported, a global dictionary ``simualations``, maping 
+simulation names (strings) to Simulation object, is created.
+"""
 
 
 from sys import stderr, stdout
 from contextlib import ExitStack
 from .result import Result
 import os
+import uuid
 
 _default_parameter_list = {'time_tick': 0.1,
                   'max_time': 4,
@@ -26,24 +31,39 @@ class Simulation(object):
     """
     Class that handles MaBoSS simulations.
 
-    It conatins several attributes:
-    network, a Network object, that will be translated in a bnd file
-    mutations, a list of nodes for which mutation can be triggered by
-      modifying the cfg file
-    palette, a mapping of nodes to color for plotting the results of 
-      the simulation.
-    param, a dictionary that contains global variables (keys starting with a '$'),
-      and simulation parameters (keys not starting with a '$').
 
+    .. py:attribute:: network
+
+      A Network object, that will be translated in a bnd file
+
+    .. py:attribute:: mutations
+
+      A list of nodes for which mutation can be triggered by
+      modifying the cfg file
+
+    .. py:attribute:: palette
+
+      A mapping of nodes to color for plotting the results of 
+      the simulation.
+
+    .. py:attribute:: param
+
+      A dictionary that contains global variables (keys starting with a '$'),
+      and simulation parameters (keys not starting with a '$').
     """
 
     
-    def __init__(self, nt, name, **kwargs):
+    def __init__(self, nt, name=None, **kwargs):
         """
         Initialize the Simulation object.
 
-        nt : a Network object
-        kwargs : parameters of the simulation
+        :param nt: the network associated with the simulation.
+        :type nt: :py:class:`Network`
+        :param str name: a string that will be the key maping to the simulation
+           object in the ``simulations`` dictionary.
+        :param dict kwargs: parameters of the simulation
+        
+        If ``name`` is ``None``, it will be replaced by a random string.
         """
         self.param = _default_parameter_list
         if 'palette' in kwargs:
@@ -58,6 +78,8 @@ class Simulation(object):
 
         self.network = nt
         self.mutations = []
+        if name is None:
+            name = uuid.uuid4() 
         self.name = name
         if name in simulations:
             print("Error simulation %s already exists" % name, file=stderr)
@@ -65,7 +87,7 @@ class Simulation(object):
             simulations[name] = self
 
     def update_parameters(self, **kwargs):
-        """Add alement to the self.param."""
+        """Add elements to ``self.param``."""
         for p in kwargs:
             if p in _default_parameter_list or p[0] == '$':
                 self.param[p] = kwargs[p]
@@ -77,11 +99,11 @@ class Simulation(object):
         return Simulation(new_network, copy_name, **(self.param), palette=self.palette)
 
     def print_bnd(self, out=stdout):
-        """Print the content of the bnd file associated to the simulation."""
+        """Produce the content of the bnd file associated to the simulation."""
         print(self.network, file=out)
 
     def print_cfg(self, out=stdout):
-        """Print the content of the cfg file associated to the simulation."""
+        """Produce the content of the cfg file associated to the simulation."""
         print("$nb_mutable = " + str(len(self.mutations)) + ";", file=out)
         for p in self.param:
             if p[0] == '$':
@@ -97,23 +119,33 @@ class Simulation(object):
             string = nd.name+'.is_internal = ' + str(int(nd.is_internal)) + ';'
             print(string, file=out)
 
-    def run(self, save=False, prefix=None):
+    def run(self):
         """Run the simulation with MaBoSS and return a Result object.
+        
+        :rtype: :py:class:`Result`
         """
 
-        return Result(self, save, prefix, self.name)
+
+        return Result(self, self.name)
 
 
     def mutate(self, node, state):
         """
         Trigger or untrigger mutation for a node.
         
-        State can be 'ON' (always up) 'OFF' (always down) or 'WT' (mutable node
-        but with normal behaviour)
+        :param node: The :py:class:`Node` to be modified
+        :type node: :py:class:`Node`
+        :param str State:
+
+            * ``'ON'`` (always up)
+            * ``'OFF'`` (always down)
+            * ``'WT'`` (mutable but with normal behaviour)
+
 
         The node will appear as a mutable node in the bnd file.
         This means that its rate will be of the form:
-        rate_up = $LowNode ? 0 :($HighNode ? 1: (@logic ? rt_up : 0))
+
+        ``rate_up = $LowNode ? 0 :($HighNode ? 1: (@logic ? rt_up : 0))``
         
         If the node is already mutable, this method will simply set $HighNode
         and $LowNode accordingly to the desired mutation.
@@ -147,7 +179,7 @@ class Simulation(object):
             print("Error, state must be ON, OFF or WT", file=stderr)
             return
 
-    def copy_results(self, result, copy_name):
+    def copy_results(self, result, copy_name=None):
         """Produce a new simulation where the initial state is the last state from result."""
         new_sim = self.copy(copy_name)
         node_prob = result.get_nodes_probtraj()

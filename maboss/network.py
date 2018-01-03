@@ -8,16 +8,27 @@ class Node(object):
     """
     Represent a node of a boolean network.
 
-    name :: str, the name of the node
-    rt_up :: str, an expression that will be evaluated by MaBoSS to determine
-    the probability of the node to switch from down to up
-    rt_down :: str, similar to rt_up but determine the probability to go from up
-    to down
-    logExp :: str, the value that will be attributed to the internal node
-    variable @logic in the bnd file
-    
-    Node objects have a __str__ method that prints their representation in the
-    MaBoSS language.
+     .. py:attribute:: name
+
+       the name of the node
+
+     .. py:attribute:: rt_up
+
+        A string, an expression that will be evaluated by *MaBoSS* to determine
+        the probability of the node to switch from down to up
+
+     .. py:attribute:: rt_down
+
+        A string, similar to rt_up but determine the probability to go from up
+        to down
+
+     .. py:attribute:: logExp
+
+        A string, the value that will be attributed to the internal node
+        variable ``@logic`` in the bnd file
+
+    Node objects have a ``__str__`` method that prints their representation in the
+    *MaBoSS* language.
     """
 
     def __init__(self, name, logExp=None, rt_up=1, rt_down=1,
@@ -45,17 +56,22 @@ class Node(object):
         """
         Set the value of rate_up and rate_down.
         
-        rate_up :: double
-        rate_down :: double
-        This function will write a simple formula of the form 
-        rate_up = @logic ? rt_up : 0 ;
-        rate_down = @logic ? 0 : rt_down ;
+        :param double rate_up: the value of ``rt_up`` in below expression
+        :param double rate_down: the value of ``rt_down`` in below expression
+
+        This function will write a simple formula of the form
+
+            ``rate_up = @logic ? rt_up : 0 ;``
+            ``rate_down = @logic ? 0 : rt_down ;``
         """
         self.rt_up = "@logic ? " + rate_up + " : 0"
         self.rt_down = "@logic ? 0 : " + rate_down
 
     def set_logic(self, string):
-        """Set logExp to str if str is a valid boolean expression."""
+        """Set logExp to string if string is a valid boolean expression.
+        
+        :param str string: the boolean expression to be attributed to ``self.logExp``
+        """
         if logic._check_logic_syntax(string):
             self.logExp = string
         else:
@@ -75,10 +91,10 @@ class Network(dict):
     """
     Represent a boolean network.
 
-    Initialised with a list of Nodes whose logExp must contain only names
+    Initialised with a list of Nodes whose ``logExp`` s must contain only names
     present in the list.
     
-    Network objetcs are in charge of carrying the initial states of each node.
+    Network objects are in charge of carrying the initial states of each node.
     """
 
     def __init__(self, nodeList):
@@ -110,6 +126,10 @@ class Network(dict):
         """
         Change the inital states probability of one or several nodes.
 
+        :param nodes: the node(s) whose initial states are to be modified
+        :type nodes: a :py:class:`Node` or a list or tuple of :py:class:`Node`
+        :param dict probDict: the probability distribution of intial states
+
         If nodes is a Node object or a singleton, probDict must be a probability
         distribution over {0, 1}, it can be expressed by a list [P(0), P(1)] or a
         dictionary: {0: P(0), 1: P(1)}.
@@ -121,6 +141,11 @@ class Network(dict):
         dictionary will be considered to be impossible. If a state has a 0 probability of
         being an intial state but might be reached later, it must explicitly appear 
         as a key in probDict.
+        
+        **Example**
+        
+        >>> my_network.set_istate('node1', [0.3, 0.7]) # node1 will have a probability of 0.7 of being up
+        >>> my_network.set_istate(['node1', 'node2'], {(0, 0): 0.4, (1, 0): 0.6, (0, 1): 0}) # node1 and node2 can never be both up because (1, 1) is not in the dictionary
         """
         if not (isinstance(nodes, list) or isinstance(nodes, tuple)):
             if not len(probDict) in [1, 2]:
@@ -167,7 +192,11 @@ class Network(dict):
         print(_str_istateList(self._initState), file=out)
 
     def set_output(self, output_list):
-        """Set all the nodes that are not in the output_list as internal."""
+        """Set all the nodes that are not in the output_list as internal.
+
+        :param output_list: the nodes to remain external
+        :type output_list: list of :py:class:`Node`
+        """
         for nd in self:
             if nd not in output_list:
                 self[nd].is_internal = True

@@ -1,4 +1,9 @@
-"""Class that contains the results of a MaBoSS simulation."""
+"""
+Class that contains the results of a MaBoSS simulation.
+
+When this module is imported, a global dictionary ``results``, maping
+results names (strings) to Result object, is created.
+"""
 
 from sys import stderr, stdout
 from .figures import make_plot_trajectory, plot_piechart, plot_fix_point, plot_node_prob
@@ -17,8 +22,12 @@ class Result(object):
     """
     Class that handles the results of MaBoSS simulation.
     
-    When a Resut object is created, two temporary files are written in /tmp/
-    these files are the .bnd and .cfg file represented by the associated
+    :param simul: The simulation object that produce the results.
+    :type simul: :py:class:`Simulation`
+    :param str name: The key under which the object will be stored in the ``results`` dictionary.
+    
+    When a Result object is created, two temporary files are written in ``/tmp/``
+    these files are the ``.bnd`` and ``.cfg`` file represented by the associated
     Simulation object. MaBoSS is then executed on these to temporary files and
     its output are stored in a temporary folder. 
     The Result object has several attributes to access the contents of the
@@ -29,7 +38,7 @@ class Result(object):
     in the working directory.
     """
 
-    def __init__(self, simul, save, prefix, name):
+    def __init__(self, simul, name):
         self._path = tempfile.mkdtemp()
         self._cfg = tempfile.mkstemp(dir=self._path, suffix='.cfg')[1]
         self._bnd = tempfile.mkstemp(dir=self._path, suffix='.bnd')[1]
@@ -60,6 +69,7 @@ class Result(object):
             print("MaBoSS ended successfuly")
 
     def plot_trajectory(self):
+        """Plot the graph state probability vs time."""
         if self._trajfig is None:
             if self._err:
                 print("Error, plot_trajectory cannot be called because MaBoSS"
@@ -78,6 +88,7 @@ class Result(object):
         return self._trajfig
 
     def plot_piechart(self):
+        """Plot the states probability distribution of last time point."""
         if self._piefig is None:
             if self._err:
                 print("Error, plot_piechart cannot be called because MaBoSS"
@@ -89,6 +100,7 @@ class Result(object):
         return self._piefig
 
     def plot_fixpoint(self):
+        """Plot the probability distribution of fixed point."""
         if self._fpfig is None:
             if self._err:
                 print("Error maboss previously returned non 0 value",
@@ -99,6 +111,7 @@ class Result(object):
         return self._fpfig
 
     def plot_node_trajectory(self):
+        """Plot the probability of each node being up over time."""
         if self._ndtraj is None:
             if self._err:
                 print("Error maboss previously returned non 0 value",
@@ -110,6 +123,7 @@ class Result(object):
         return self._ndtraj
 
     def get_fptable(self): 
+        """Return the content of fp.csv as a pandas dataframe."""
         if self.fptable is None:
             table_file = "{}/res_fp.csv".format(self._path)
             self.fptable = pd.read_csv(table_file, "\t", skiprows=[0])

@@ -14,6 +14,7 @@ from .network import Node, Network
 from .simulation import Simulation
 externVar = pp.Suppress('$') + ~pp.White() + varName
 externVar.setParseAction(lambda token: token[0])
+import uuid
 
 # ====================
 # bnd grammar
@@ -67,7 +68,7 @@ cfg_grammar = pp.ZeroOrMore(cfg_decl)
 cfg_grammar.ignore('//' + pp.restOfLine)
 
 
-def build_network(prefix, simulation_name):
+def build_network(prefix, simulation_name=None):
     """Read prefix.bnd and prefix.cfg and build the corresponding Network."""
     cfg_filename = prefix + '.cfg'
     if not isfile(cfg_filename):
@@ -99,8 +100,14 @@ def build_network(prefix, simulation_name):
         return Simulation(net, simulation_name, **parameters)
 
 
-def load_file(filename, simulation_name):
-    """Loads a network from a MaBoSS format file."""
+def load_file(filename, simulation_name=None):
+    """Loads a network from a MaBoSS format file.
+
+    filename
+      A relative or absolute path to a file with extension ``.bnd`` or ``.cfg``.
+    simulation_name
+      The name of the returned ``Simulation`` object.
+    """
 
     if filename.endswith(".cfg") or filename.endswith(".bnd"):
         filename = filename[:-4]
