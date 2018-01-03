@@ -1,12 +1,7 @@
 
 menu = [
-    {'name': 'Load network (MaBoSS format)',
+    {'name': 'Load MaBoSS file',
      'snippet': ["mysimulation = maboss.load_file(\"filename\")"]},
-
-    {'name': 'Load network (zginml format)',
-     'snippet': ["m = ginsim.open(\"myModel.zginml\")",
-                 "ginsim.service(\"maboss\").export(m, \"mybndfile.bnd\")",
-                 "master_simulation = maboss.load_file(\"mybndfile.bnd\", simulation_name=\"master\")"]},
 
     {'name': 'Network',
      'sub-menu': [
@@ -45,22 +40,5 @@ menu = [
      }
 ]
 
-toolbar = [
-    {"name": "Label",
-     "setup": {
-        "icon": "fa-something", # http://fontawesome.io/icons/
-        "help": "tooltip text",
-        "handler": "javascript_function_1"}}
-]
-
-## additional javascript functions, optional
-js_api = {
-    "javascript_function_1":
-        """
-        function () { alert("plop"); }
-        """,
-    "javascript_function_2":
-        """
-        function () { alert("bar"); }
-        """,
-}
+toolbar = None
+js_api = {}

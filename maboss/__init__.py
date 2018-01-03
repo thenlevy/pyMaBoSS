@@ -8,8 +8,6 @@ from colomoto_jupyter import IN_IPYTHON
 if IN_IPYTHON:
     from colomoto_jupyter import jupyter_setup
     from .widgets import *
-    import ginsim
-
 
     jupyter_setup("mymodule",
         label="MaBoSS",
