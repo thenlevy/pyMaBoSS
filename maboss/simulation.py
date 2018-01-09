@@ -79,7 +79,7 @@ class Simulation(object):
         self.network = nt
         self.mutations = []
         if name is None:
-            name = uuid.uuid4() 
+            name = str(uuid.uuid4())
         self.name = name
         if name in simulations:
             print("Error simulation %s already exists" % name, file=stderr)
@@ -157,6 +157,7 @@ class Simulation(object):
         nd = self.network[node]
         if not nd.is_mutant:
             self.network[node]=_make_mutant_node(nd)
+            self.mutations.append(nd.name)
             
             
         
