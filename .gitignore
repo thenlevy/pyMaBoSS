@@ -6,7 +6,6 @@
 *~
 \#*\#
 __pycache__
-*.txt
 dist
 build
 *.egg-info
