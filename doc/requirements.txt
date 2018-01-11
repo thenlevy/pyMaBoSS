@@ -2,3 +2,4 @@ nbsphinx
 pyparsing
 colomoto_jupyter
 pandas
+matplotlib
