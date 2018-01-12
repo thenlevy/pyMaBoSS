@@ -34,14 +34,14 @@ intPart = pp.Word(pp.nums)
 intPart.setParseAction(lambda token: int(token[0]))
 floatNum = pp.Word(pp.nums + '.' + 'E' + 'e' + '-' + '+')
 floatNum.setParseAction(lambda token: float(token[0]))
+numOrBool = (floatNum("value") | (pp.CaselessLiteral("True")
+                                  | pp.CaselessLiteral("False"))("bValue"))
 var_decl = pp.Group(externVar("lhs") + pp.Suppress('=')
-                    + floatNum("rhs") + pp.Suppress(';'))
+                    + numOrBool("rhs") + pp.Suppress(';'))
+
 
 param_decl = pp.Group(varName("param") + pp.Suppress('=')
-                      + (floatNum("value")
-                         | (pp.CaselessLiteral("True")
-                            | pp.CaselessLiteral("False"))("bValue"))
-                      + pp.Suppress(';'))
+                      + numOrBool + pp.Suppress(';'))
 
 stateSet = (pp.Suppress('[') + pp.Group(pp.delimitedList(intPart))
             + pp.Suppress(']'))
@@ -114,6 +114,8 @@ def _read_cfg(string):
         parse_cfg = cfg_grammar.parseString(string)
         for token in parse_cfg:
             if token.lhs:  # True if token is var_decl
+                if type(token.rhs) is str:
+                    token.rhs = bool(token.rhs)
                 variables[token.lhs] = token.rhs
             if token.node:  # True if token is internal_decl
                 is_internal_list[token.node] = float(token.is_internal_val)
