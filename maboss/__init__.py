@@ -1,7 +1,7 @@
 from .network import Node, Network
 from .simulation import Simulation, simulations
 from .result import Result, results
-from .gsparser import build_network, load_file
+from .gsparser import load_file
 
 
 from colomoto_jupyter import IN_IPYTHON
