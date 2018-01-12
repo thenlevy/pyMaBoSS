@@ -166,7 +166,7 @@ def _read_bnd(string, is_internal_list):
         parse_bnd = bnd_grammar.parseString(string)
         for token in parse_bnd:
             interns = {v.lhs: v.rhs for v in token.interns}
-            logic = interns.pop('logic')
+            logic = interns.pop('logic') if 'logic' in interns else 'False'
             rate_up = interns.pop('rate_up')
             rate_down = interns.pop('rate_down')
 
