@@ -37,7 +37,10 @@ menu = [
 
                   {'name': 'Plot trajectory',
                    'snippet': ["master_results.plot_trajectory()"]}]
-     }
+     },
+     "---",
+     {"name": "Documentation",
+        "external-link": "http://pymaboss.readthedocs.io"}
 ]
 
 toolbar = None
