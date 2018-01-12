@@ -72,6 +72,8 @@ class Node(object):
         
         :param str string: the boolean expression to be attributed to ``self.logExp``
         """
+        if not string:
+            self.logExp = None
         if logic._check_logic_syntax(string):
             self.logExp = string
         else:
@@ -104,7 +106,7 @@ class Network(dict):
         self.logicExp = {nd.name: nd.logExp for nd in nodeList}
 
         if not logic._check_logic_defined(self.names,
-                                          [nd.logExp for nd in nodeList]):
+                                          [nd.logExp for nd in nodeList if nd.logExp]):
             raise ValueError("Some logic rule had unkown variables")
 
         # _attribution gives for each node the list of node with which it is
@@ -229,7 +231,7 @@ def _strNode(nd):
                                       nd.internal_var.keys()))
     string = "\n".join(["Node " + nd.name + " {",
                         internal_var_decl,
-                        "\tlogic = " + nd.logExp + ";",
+                        ("\tlogic = " + nd.logExp + ";") if nd.logExp else "",
                         ("\trate_up = " + rt_up_str + ";"),
                         ("\trate_down = " + rt_down_str + ";"),
                         "}"])

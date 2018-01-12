@@ -5,6 +5,7 @@ the very specific structure of the ginsim output and not able to parse every
 MaBoSS file.
 """
 
+import sys
 from sys import stderr
 from os.path import isfile
 import pyparsing as pp
@@ -25,6 +26,7 @@ node_decl = pp.Group(pp.Suppress("Node") + varName("name") + pp.Suppress('{')
                      + pp.OneOrMore(internal_var_decl)('interns')
                      + pp.Suppress('}'))
 bnd_grammar = pp.OneOrMore(node_decl)
+bnd_grammar.ignore('//' + pp.restOfLine)
 
 # =====================
 # cfg grammar
@@ -105,13 +107,6 @@ def load_file(bnd_filename, cfg_filename, simulation_name=None):
         bnd_content = bnd_file.read()
         cfg_content = cfg_file.read()
 
-        if not cfg_grammar.matches(cfg_content):
-            print("Error: syntax error in cfg file", file=stderr)
-            return
-        if not bnd_grammar.matches(bnd_content):
-            print("Error: syntax error in bnd file", file=stderr)
-            return
-
         (variables, parameters, is_internal_list,
          istate_list, refstate_list) = _read_cfg(cfg_content)
 
@@ -166,7 +161,7 @@ def _read_bnd(string, is_internal_list):
         parse_bnd = bnd_grammar.parseString(string)
         for token in parse_bnd:
             interns = {v.lhs: v.rhs for v in token.interns}
-            logic = interns.pop('logic') if 'logic' in interns else 'False'
+            logic = interns.pop('logic') if 'logic' in interns else None
             rate_up = interns.pop('rate_up')
             rate_down = interns.pop('rate_down')
 

@@ -39,7 +39,7 @@ def _check_logic_defined(name_list, logic_list):
     # check if variables exist.
     def check_var(var):
         if var[0] not in name_list:
-            print("Error: unkown varriable %s" % var[0], file=stderr)
+            print("Error: unkown variable %s" % var[0], file=stderr)
             _check_logic_defined.failed = True
         return var
 
