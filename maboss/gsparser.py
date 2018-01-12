@@ -34,8 +34,22 @@ intPart = pp.Word(pp.nums)
 intPart.setParseAction(lambda token: int(token[0]))
 floatNum = pp.Word(pp.nums + '.' + 'E' + 'e' + '-' + '+')
 floatNum.setParseAction(lambda token: float(token[0]))
-numOrBool = (floatNum("value") | (pp.CaselessLiteral("True")
-                                  | pp.CaselessLiteral("False"))("bValue"))
+booleanStr = (pp.oneOf('0 1')
+              | pp.CaselessLiteral("True") | pp.CaselessLiteral("False"))
+
+
+def booleanStrAction(token):
+    if pp.CaselessLiteral("True").matches(token):
+        return '1'
+    elif pp.CaselessLiteral("False").matches(token):
+        return '0'
+    else:
+        return token
+
+
+booleanStr.setParseAction(lambda token: booleanStrAction(token[0]))
+numOrBool = (floatNum | booleanStr)("value")
+
 var_decl = pp.Group(externVar("lhs") + pp.Suppress('=')
                     + numOrBool("rhs") + pp.Suppress(';'))
 
@@ -60,10 +74,16 @@ oneIstate_decl = pp.Group(varName("nd_i") + ~pp.White() + pp.Suppress('.istate')
 
 internal_decl = pp.Group(varName("node") + ~pp.White()
                          + pp.Suppress(".is_internal") + pp.Suppress('=')
-                         + pp.oneOf('0 1')("is_internal_val")
+                         + booleanStr("is_internal_val")
                          + pp.Suppress(';'))
 
-cfg_decl = var_decl | istate_decl | param_decl | internal_decl | oneIstate_decl
+refstate_decl = pp.Group(varName("node") + ~pp.White()
+                         + pp.Suppress(".refstate") + pp.Suppress('=')
+                         + booleanStr("refstate_val")
+                         + pp.Suppress(';'))
+
+cfg_decl = (var_decl | istate_decl | param_decl | internal_decl
+            | oneIstate_decl | refstate_decl)
 cfg_grammar = pp.ZeroOrMore(cfg_decl)
 cfg_grammar.ignore('//' + pp.restOfLine)
 
@@ -93,7 +113,7 @@ def load_file(bnd_filename, cfg_filename, simulation_name=None):
             return
 
         (variables, parameters, is_internal_list,
-         istate_list) = _read_cfg(cfg_content)
+         istate_list, refstate_list) = _read_cfg(cfg_content)
 
         nodes = _read_bnd(bnd_content, is_internal_list)
 
@@ -103,7 +123,9 @@ def load_file(bnd_filename, cfg_filename, simulation_name=None):
         for v in variables:
             lhs = '$'+v
             parameters[lhs] = variables[v]
-        return Simulation(net, simulation_name, **parameters)
+        ret = Simulation(net, simulation_name, **parameters)
+        ret.refstate = refstate_list
+        return ret
 
 
 def _read_cfg(string):
@@ -111,19 +133,17 @@ def _read_cfg(string):
         parameters = {}
         is_internal_list = {}
         istate_list = {}
+        refstate_list = {}
         parse_cfg = cfg_grammar.parseString(string)
         for token in parse_cfg:
             if token.lhs:  # True if token is var_decl
-                if type(token.rhs) is str:
-                    token.rhs = bool(token.rhs)
                 variables[token.lhs] = token.rhs
-            if token.node:  # True if token is internal_decl
-                is_internal_list[token.node] = float(token.is_internal_val)
+            if token.is_internal_val:  # True if token is internal_decl
+                is_internal_list[token.node] = token.is_internal_val
+            if token.refstate_val:
+                refstate_list[token.node] = token.refstate_val
             if token.param:  # True if token is param_decl
-                if token.bValue:
-                    parameters[token.param] = int(bool(token.bValue))
-                else:
-                    parameters[token.param] = float(token.value)
+                parameters[token.param] = float(token.value)
             if token.nd_i:
                 istate_list[token.nd_i] = {0: 1 - int(token.istate_val),
                                            1: int(token.istate_val)}
@@ -137,7 +157,8 @@ def _read_cfg(string):
                     istate_list[nodes] = {tuple(t[1]): t[0]
                                           for t in token.attrib}
 
-        return (variables, parameters, is_internal_list, istate_list)
+        return (variables, parameters, is_internal_list, istate_list,
+                refstate_list)
 
 
 def _read_bnd(string, is_internal_list):

@@ -1,6 +1,6 @@
 """Class that handles the parameters of a MaBoSS simulation.
 
-When this module is imported, a global dictionary ``simualations``, maping 
+When this module is imported, a global dictionary ``simualations``, maping
 simulation names (strings) to Simulation object, is created.
 """
 
@@ -43,7 +43,7 @@ class Simulation(object):
 
     .. py:attribute:: palette
 
-      A mapping of nodes to color for plotting the results of 
+      A mapping of nodes to color for plotting the results of
       the simulation.
 
     .. py:attribute:: param
@@ -52,7 +52,7 @@ class Simulation(object):
       and simulation parameters (keys not starting with a '$').
     """
 
-    
+
     def __init__(self, nt, name=None, **kwargs):
         """
         Initialize the Simulation object.
@@ -62,7 +62,7 @@ class Simulation(object):
         :param str name: a string that will be the key maping to the simulation
            object in the ``simulations`` dictionary.
         :param dict kwargs: parameters of the simulation
-        
+
         If ``name`` is ``None``, it will be replaced by a random string.
         """
         self.param = _default_parameter_list
@@ -78,6 +78,7 @@ class Simulation(object):
 
         self.network = nt
         self.mutations = []
+        self.refstate = {}
         if name is None:
             name = str(uuid.uuid4())
         self.name = name
@@ -119,9 +120,13 @@ class Simulation(object):
             string = nd.name+'.is_internal = ' + str(int(nd.is_internal)) + ';'
             print(string, file=out)
 
+        for nd in self.refstate:
+            string = nd +'.refstate = ' + self.refstate[nd] + ';'
+            print(string, file=out)
+
     def run(self):
         """Run the simulation with MaBoSS and return a Result object.
-        
+
         :rtype: :py:class:`Result`
         """
 
@@ -132,7 +137,7 @@ class Simulation(object):
     def mutate(self, node, state):
         """
         Trigger or untrigger mutation for a node.
-        
+
         :param node: The :py:class:`Node` to be modified
         :type node: :py:class:`Node`
         :param str State:
@@ -146,7 +151,7 @@ class Simulation(object):
         This means that its rate will be of the form:
 
         ``rate_up = $LowNode ? 0 :($HighNode ? 1: (@logic ? rt_up : 0))``
-        
+
         If the node is already mutable, this method will simply set $HighNode
         and $LowNode accordingly to the desired mutation.
         """
@@ -158,15 +163,15 @@ class Simulation(object):
         if not nd.is_mutant:
             self.network[node]=_make_mutant_node(nd)
             self.mutations.append(nd.name)
-            
-            
-        
+
+
+
         lowvar = "$Low_"+node
         highvar = "$High_"+node
         if state == "ON":
             self.param[lowvar] = 0
             self.param[highvar] = 1
-            
+
 
         elif state == "OFF":
             self.param[lowvar] = 1
@@ -212,4 +217,3 @@ def _make_mutant_node(nd):
     newNode.rt_down = rt_down
     newNode.is_mutant = True
     return newNode
-
