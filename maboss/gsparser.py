@@ -68,13 +68,19 @@ cfg_grammar = pp.ZeroOrMore(cfg_decl)
 cfg_grammar.ignore('//' + pp.restOfLine)
 
 
-def build_network(prefix, simulation_name=None):
-    """Read prefix.bnd and prefix.cfg and build the corresponding Network."""
-    cfg_filename = prefix + '.cfg'
-    if not isfile(cfg_filename):
-        cfg_filename = prefix + '.bnd.cfg'  # File produced by the ginsim module
+def load_file(bnd_filename, cfg_filename, simulation_name=None):
+    """Loads a network from a MaBoSS format file.
+
+    :param str bnd_filename: Network file
+    :param str cfg_filename: Configuraton file
+    :keyword str simulation_name: name of the returned :py:class:`.Simulation` object
+    :rtype: :py:class:`.Simulation`
+    """
+    assert bnd_filename.lower().endswith(".bnd"), "wrong extension for bnd file"
+    assert cfg_filename.lower().endswith(".cfg"), "wrong extension for cfg file"
+
     with ExitStack() as stack:
-        bnd_file = stack.enter_context(open(prefix + '.bnd', 'r'))
+        bnd_file = stack.enter_context(open(bnd_filename, 'r'))
         cfg_file = stack.enter_context(open(cfg_filename, 'r'))
         bnd_content = bnd_file.read()
         cfg_content = cfg_file.read()
@@ -99,22 +105,6 @@ def build_network(prefix, simulation_name=None):
             parameters[lhs] = variables[v]
         return Simulation(net, simulation_name, **parameters)
 
-
-def load_file(filename, simulation_name=None):
-    """Loads a network from a MaBoSS format file.
-
-    filename
-      A relative or absolute path to a file with extension ``.bnd`` or ``.cfg``.
-    simulation_name
-      The name of the returned ``Simulation`` object.
-    """
-
-    if filename.endswith(".cfg") or filename.endswith(".bnd"):
-        filename = filename[:-4]
-        return build_network(filename, simulation_name)
-    else:
-        print("Error, filename must end with .bnd or .cfg", file=stderr)
-        return
 
 def _read_cfg(string):
         variables = {}
