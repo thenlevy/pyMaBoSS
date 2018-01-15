@@ -70,15 +70,11 @@ class Result(object):
 
     def plot_trajectory(self):
         """Plot the graph state probability vs time."""
-        if self._trajfig is None:
-            if self._err:
-                print("Error, plot_trajectory cannot be called because MaBoSS"
-                      "returned non 0 value", file=stderr)
-                return
-            self._trajfig = self.make_trajectory()
-            return self._trajfig
-        else:
-            return self._trajfig.show()
+        if self._err:
+            print("Error, plot_trajectory cannot be called because MaBoSS"
+                  "returned non 0 value", file=stderr)
+            return
+        self._trajfig = self.make_trajectory()
 
     def make_trajectory(self):
         prefix = self._path+'/res'
@@ -89,38 +85,32 @@ class Result(object):
 
     def plot_piechart(self):
         """Plot the states probability distribution of last time point."""
-        if self._piefig is None:
-            if self._err:
-                print("Error, plot_piechart cannot be called because MaBoSS"
-                      "returned non 0 value", file=stderr)
-                return
-            self._piefig, self._pieax = plt.subplots(1, 1)
-            table = self.get_states_probtraj()
-            plot_piechart(table, self._pieax, self.palette)
-        return self._piefig
+        if self._err:
+            print("Error, plot_piechart cannot be called because MaBoSS"
+                  "returned non 0 value", file=stderr)
+            return
+        self._piefig, self._pieax = plt.subplots(1, 1)
+        table = self.get_states_probtraj()
+        plot_piechart(table, self._pieax, self.palette)
 
     def plot_fixpoint(self):
         """Plot the probability distribution of fixed point."""
-        if self._fpfig is None:
-            if self._err:
-                print("Error maboss previously returned non 0 value",
-                      file=stderr)
-                return
-            self._fpfig, self._fpax = plt.subplots(1, 1)
-            plot_fix_point(self.get_fptable(), self._fpax, self.palette)
-        return self._fpfig
+        if self._err:
+            print("Error maboss previously returned non 0 value",
+                  file=stderr)
+            return
+        self._fpfig, self._fpax = plt.subplots(1, 1)
+        plot_fix_point(self.get_fptable(), self._fpax, self.palette)
 
     def plot_node_trajectory(self):
         """Plot the probability of each node being up over time."""
-        if self._ndtraj is None:
-            if self._err:
-                print("Error maboss previously returned non 0 value",
-                      file=stderr)
-                return
-            self._ndtraj, self._ndtrajax = plt.subplots(1, 1)
-            table = self.get_nodes_probtraj()
-            plot_node_prob(table, self._ndtrajax, self.palette)
-        return self._ndtraj
+        if self._err:
+            print("Error maboss previously returned non 0 value",
+                  file=stderr)
+            return
+        self._ndtraj, self._ndtrajax = plt.subplots(1, 1)
+        table = self.get_nodes_probtraj()
+        plot_node_prob(table, self._ndtrajax, self.palette)
 
     def get_fptable(self): 
         """Return the content of fp.csv as a pandas dataframe."""
