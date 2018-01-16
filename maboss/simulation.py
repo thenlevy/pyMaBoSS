@@ -95,7 +95,7 @@ class Simulation(object):
             else:
                 print("Warning: unused parameter %s" % p, file=stderr)
 
-    def copy(self, copy_name):
+    def copy(self, copy_name=None):
         new_network = self.network.copy()
         return Simulation(new_network, copy_name, **(self.param), palette=self.palette)
 
