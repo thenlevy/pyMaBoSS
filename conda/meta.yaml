@@ -27,6 +27,7 @@ requirements:
     - pandas
     - pyparsing
     - python
+    - matplotlib
 
 about:
   home: https://github.com/thenlevy/pyMaBoSS
