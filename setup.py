@@ -3,7 +3,7 @@
 from setuptools import setup, find_packages
 
 setup(name='maboss',
-    version="0.4",
+    version="0.5",
     packages=find_packages(),
     author="Nicolas Levy",
     author_email="nicolaspierrelevy@gmail.com",
