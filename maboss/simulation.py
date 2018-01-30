@@ -7,6 +7,9 @@ simulation names (strings) to Simulation object, is created.
 
 from sys import stderr, stdout
 from contextlib import ExitStack
+
+from colomoto import ModelState
+
 from .result import Result
 import os
 import uuid
@@ -196,6 +199,20 @@ class Simulation(object):
                 new_sim.network.set_istate(i, [1 - prob, prob])
         return new_sim
 
+    def get_initial_state(self):
+        """
+        TODO
+        """
+        istate = ModelState()
+        for nd in self.network.keys():
+            states = set()
+            for state in [0, 1]:
+                if network._initState[nd][state]:
+                    states.add(state)
+            istate[nd] = states.pop() if len(states) == 1 else states
+        return istate
+
+
 def run_simulation(name):
     return simulations[name].run()
 
@@ -222,5 +239,14 @@ def set_nodes_istate(masim, nodes, istate):
     for n in nodes:
         masim.network.set_istate(n, istate)
 
-__ALL__ = ["Simulation", "simulations", "set_nodes_istate"]
+def set_output(masim, output):
+    masim.network.set_output(output)
+
+def copy_and_mutate(masim, nodes, mut):
+    masim2 = masim.copy()
+    for node in nodes:
+        masim2.mutate(node, mut)
+    return masim2
+
+__ALL__ = ["Simulation", "set_nodes_istate", "set_output"]
 
