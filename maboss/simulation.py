@@ -217,3 +217,10 @@ def _make_mutant_node(nd):
     newNode.rt_down = rt_down
     newNode.is_mutant = True
     return newNode
+
+def set_nodes_istate(masim, nodes, istate):
+    for n in nodes:
+        masim.network.set_istate(n, istate)
+
+__ALL__ = ["Simulation", "simulations", "set_nodes_istate"]
+

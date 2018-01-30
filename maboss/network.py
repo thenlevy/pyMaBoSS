@@ -262,3 +262,6 @@ def _str_istateList(isl):
             string += str(isl[binding][1]) + '[1];'
         stringList.append(string)
     return '\n'.join(stringList)
+
+__ALL__ = ["Node", "Network"]
+

@@ -1,5 +1,5 @@
-from .network import Node, Network
-from .simulation import Simulation, simulations
+from .network import *
+from .simulation import *
 from .result import Result, results
 from .gsparser import load
 

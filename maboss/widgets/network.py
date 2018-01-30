@@ -2,9 +2,10 @@ from __future__ import print_function
 from ipywidgets import interact, interactive, fixed, interact_manual
 import ipywidgets as widgets
 from IPython import get_ipython
-from .code_cell import create_code_cell
 import ast
 from .. import simulations
+
+from colomoto_jupyter.widget_utils import jupyter_replace_cell_call
 
 def wg_set_istate(simul):
     if type(simul) is str:
@@ -23,12 +24,9 @@ def wg_set_istate(simul):
             istate = [0, 1]
         elif istate == 0:
             istate = [1, 0]
-        python_code=[]
-        python_code.append('simul = maboss.simulations[\"{}\"]'.format(simul.name))
-        python_code.append('nodes = {}'.format(str(selector.value)))
-        python_code.append('istate = {}'.format(str(istate)))
-        python_code.append("for nd in nodes:\n    simul.network.set_istate(nd, istate)")
-        create_code_cell("\n".join(python_code))
+        jupyter_replace_cell_call("wg_set_istate", "set_nodes_istate",
+                    (selector.value, istate), comment=True)
+
     ok_button = widgets.Button(description='Ok')
     ok_button.on_click(trigger)
     display(ok_button)
