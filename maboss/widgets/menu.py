@@ -1,42 +1,42 @@
 
 menu = [
     {'name': 'Load MaBoSS file',
-     'snippet': ["mysimulation = maboss.load_file(\"filename\")"]},
+     'snippet': ["masim = maboss.load(\"filename.bnd\", \"filename.cfg\")"]},
 
     {'name': 'Network',
      'sub-menu': [
          {'name': 'Set istate',
-          'snippet': ["maboss.wg_set_istate(\"master\")"]},
+          'snippet': ["maboss.wg_set_istate(masim)"]},
          {'name': 'Transfer istates to pint',
-          'snippet': ["maboss.wg_transfer_istate(master_simulation.network, model)"]}
+          'snippet': ["maboss.wg_transfer_istate(masim.network, model)"]}
      ]},
 
     {'name': 'Simulation',
      'sub-menu': [
           {'name': 'Create mutant',
-           'snippet': ["maboss.wg_make_mutant(master_simulation)"]},
+           'snippet': ["maboss.wg_make_mutant(masim)"]},
 
           {'name': 'Run',
-           'snippet': ["master_results = master_simulation.run()"]},
+           'snippet': ["simres = masim.run()"]},
 
           {'name': 'Set initial states',
-           'snippet': ["master_simulation.network.set_istate([\"mygenelist\"],{})"]},
+           'snippet': ["masim.network.set_istate([\"mygenelist\"],{})"]},
 
           {'name': 'Set output',
-           'snippet': ["maboss.wg_set_output(master_simulation)"]},
+           'snippet': ["maboss.wg_set_output(masim)"]},
 
      ]},
 
     {'name': 'Results',
      'sub-menu': [
                   {'name': 'Save results',
-                   'snippet': ["master_results.save(\"master\", replace=False)"]},
+                   'snippet': ["simres.save(\"filename\")"]},
 
                   {'name': 'Plot piechart',
-                   'snippet': ["master_results.plot_piechart()"]},
+                   'snippet': ["simres.plot_piechart()"]},
 
                   {'name': 'Plot trajectory',
-                   'snippet': ["master_results.plot_trajectory()"]}]
+                   'snippet': ["simres.plot_trajectory()"]}]
      },
      "---",
      {"name": "Documentation",
