@@ -11,3 +11,5 @@ build
 *.egg-info
 .ipynb*
 .*.sw*
+gen
+*.log
