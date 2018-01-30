@@ -7,8 +7,8 @@ menu = [
      'sub-menu': [
          {'name': 'Set istate',
           'snippet': ["maboss.wg_set_istate(masim)"]},
-         {'name': 'Transfer istates to pint',
-          'snippet': ["maboss.wg_transfer_istate(masim.network, model)"]}
+         {'name': 'Get initial state',
+          'snippet': ["masim.get_initial_state()"]}
      ]},
 
     {'name': 'Simulation',

@@ -90,7 +90,7 @@ cfg_grammar = pp.ZeroOrMore(cfg_decl)
 cfg_grammar.ignore('//' + pp.restOfLine)
 
 
-def load(bnd_filename, cfg_filename, simulation_name=None):
+def load(bnd_filename, cfg_filename):
     """Loads a network from a MaBoSS format file.
 
     :param str bnd_filename: Network file
@@ -118,7 +118,7 @@ def load(bnd_filename, cfg_filename, simulation_name=None):
         for v in variables:
             lhs = '$'+v
             parameters[lhs] = variables[v]
-        ret = Simulation(net, simulation_name, **parameters)
+        ret = Simulation(net, **parameters)
         ret.refstate = refstate_list
         return ret
 

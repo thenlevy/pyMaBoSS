@@ -1,7 +1,4 @@
 """Class that handles the parameters of a MaBoSS simulation.
-
-When this module is imported, a global dictionary ``simualations``, maping
-simulation names (strings) to Simulation object, is created.
 """
 
 
@@ -27,8 +24,6 @@ _default_parameter_list = {'time_tick': 0.1,
                   'statdist_similarity_cache_max_size': 20000
                   }
 
-
-simulations = {}  # global maping of simulation names to simulation object
 
 class Simulation(object):
     """
@@ -56,17 +51,13 @@ class Simulation(object):
     """
 
 
-    def __init__(self, nt, name=None, **kwargs):
+    def __init__(self, nt, **kwargs):
         """
         Initialize the Simulation object.
 
         :param nt: the network associated with the simulation.
         :type nt: :py:class:`Network`
-        :param str name: a string that will be the key maping to the simulation
-           object in the ``simulations`` dictionary.
         :param dict kwargs: parameters of the simulation
-
-        If ``name`` is ``None``, it will be replaced by a random string.
         """
         self.param = _default_parameter_list
         if 'palette' in kwargs:
@@ -82,13 +73,6 @@ class Simulation(object):
         self.network = nt
         self.mutations = []
         self.refstate = {}
-        if name is None:
-            name = str(uuid.uuid4())
-        self.name = name
-        if name in simulations:
-            print("Error simulation %s already exists" % name, file=stderr)
-        else:
-            simulations[name] = self
 
     def update_parameters(self, **kwargs):
         """Add elements to ``self.param``."""
@@ -98,9 +82,9 @@ class Simulation(object):
             else:
                 print("Warning: unused parameter %s" % p, file=stderr)
 
-    def copy(self, copy_name=None):
+    def copy(self):
         new_network = self.network.copy()
-        return Simulation(new_network, copy_name, **(self.param), palette=self.palette)
+        return Simulation(new_network, **(self.param), palette=self.palette)
 
     def print_bnd(self, out=stdout):
         """Produce the content of the bnd file associated to the simulation."""
@@ -132,9 +116,7 @@ class Simulation(object):
 
         :rtype: :py:class:`Result`
         """
-
-
-        return Result(self, self.name)
+        return Result(self)
 
 
     def mutate(self, node, state):
@@ -207,14 +189,11 @@ class Simulation(object):
         for nd in self.network.keys():
             states = set()
             for state in [0, 1]:
-                if network._initState[nd][state]:
+                if self.network._initState[nd][state]:
                     states.add(state)
             istate[nd] = states.pop() if len(states) == 1 else states
         return istate
 
-
-def run_simulation(name):
-    return simulations[name].run()
 
 def _make_mutant_node(nd):
     """Create a new logic for mutation that can be activated from .cfg file."""

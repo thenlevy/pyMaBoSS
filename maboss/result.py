@@ -1,8 +1,5 @@
 """
 Class that contains the results of a MaBoSS simulation.
-
-When this module is imported, a global dictionary ``results``, maping
-results names (strings) to Result object, is created.
 """
 
 from sys import stderr, stdout
@@ -17,14 +14,12 @@ from contextlib import ExitStack
 import os
 import subprocess
 
-results = {}  # global maping of results name to results objects
 class Result(object):
     """
     Class that handles the results of MaBoSS simulation.
     
     :param simul: The simulation object that produce the results.
     :type simul: :py:class:`Simulation`
-    :param str name: The key under which the object will be stored in the ``results`` dictionary.
     
     When a Result object is created, two temporary files are written in ``/tmp/``
     these files are the ``.bnd`` and ``.cfg`` file represented by the associated
@@ -38,7 +33,7 @@ class Result(object):
     in the working directory.
     """
 
-    def __init__(self, simul, name):
+    def __init__(self, simul):
         self._path = tempfile.mkdtemp()
         self._cfg = tempfile.mkstemp(dir=self._path, suffix='.cfg')[1]
         self._bnd = tempfile.mkstemp(dir=self._path, suffix='.bnd')[1]
@@ -50,10 +45,6 @@ class Result(object):
         self.fptable = None
         self.state_probtraj = None
         self.nd_probtraj = None
-        if name in results:
-            print("Error result % already exists" % name, file=stderr)
-        else:
-            results[name] = self
 
         with ExitStack() as stack:
             bnd_file = stack.enter_context(open(self._bnd, 'w'))
@@ -245,3 +236,5 @@ def get_states(df):
             if type(df[c][i]) is str:  # Otherwise it is nan
                 states.add(df[c][i])
     return states
+
+__ALL__ = ["Result"]

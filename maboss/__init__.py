@@ -1,6 +1,6 @@
 from .network import *
 from .simulation import *
-from .result import Result, results
+from .result import *
 from .gsparser import load
 
 
