@@ -170,16 +170,15 @@ class Simulation(object):
             print("Error, state must be ON, OFF or WT", file=stderr)
             return
 
-    def copy_results(self, result, copy_name=None):
-        """Produce a new simulation where the initial state is the last state from result."""
-        new_sim = self.copy(copy_name)
+    def continue_from_result(self, result):
+        """Set the initial state from as the last state from result."""
         node_prob = result.get_nodes_probtraj()
         nodes = node_prob.iloc[-1]
         for i in nodes.index:
             if i != "<nil>":
                 prob = nodes[i]
-                new_sim.network.set_istate(i, [1 - prob, prob])
-        return new_sim
+                self.network.set_istate(i, [1 - prob, prob])
+        return self
 
     def get_initial_state(self):
         """
