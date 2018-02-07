@@ -56,8 +56,6 @@ class Result(object):
                                      self._path+'/res', self._bnd])
         if self._err:
             print("Error, MaBoSS returned non 0 value", file=stderr)
-        else:
-            print("MaBoSS ended successfuly")
 
     def plot_trajectory(self):
         """Plot the graph state probability vs time."""
