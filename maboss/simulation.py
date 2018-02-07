@@ -178,7 +178,6 @@ class Simulation(object):
             if i != "<nil>":
                 prob = nodes[i]
                 self.network.set_istate(i, [1 - prob, prob])
-        return self
 
     def get_initial_state(self):
         """
@@ -225,6 +224,4 @@ def copy_and_mutate(masim, nodes, mut):
     for node in nodes:
         masim2.mutate(node, mut)
     return masim2
-
-__ALL__ = ["Simulation", "set_nodes_istate", "set_output"]
 

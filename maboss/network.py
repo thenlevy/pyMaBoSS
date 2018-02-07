@@ -263,5 +263,3 @@ def _str_istateList(isl):
         stringList.append(string)
     return '\n'.join(stringList)
 
-__ALL__ = ["Node", "Network"]
-

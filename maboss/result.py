@@ -235,4 +235,4 @@ def get_states(df):
                 states.add(df[c][i])
     return states
 
-__ALL__ = ["Result"]
+__all__ = ["Result"]
