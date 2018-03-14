@@ -212,6 +212,8 @@ def make_node_proba_table(df):
                     nodes = [state]
                 for nd in nodes:
                     time_table[nd][tp] += df[prob_col][i]
+
+    time_table.sort_index(axis=1, inplace=True)
     return time_table
     
 def get_nodes(df):
