@@ -30,7 +30,7 @@ def plot_node_prob(time_table, ax, palette):
     time_table.plot(ax=ax, color=color_list)
 
 
-def plot_piechart(plot_table, ax, palette):
+def plot_piechart(plot_table, ax, palette, embed_labels=True, autopct=False):
     plot_line = plot_table.iloc[-1].rename("")  # Takes the last time point
     plot_line = plot_line[plot_line > 0.01]
     plotting_labels = []
@@ -38,13 +38,21 @@ def plot_piechart(plot_table, ax, palette):
     for value_index, value in enumerate(plot_line):
         state = plot_line.index.values[value_index]
         add_color(state, color_list, palette)
-        if value >= 0.1:
+        if embed_labels and value >= 0.1:
             plotting_labels.append(state)
         else:
             plotting_labels.append("")
-    ax.pie(plot_line, labels=plotting_labels, radius=1.2, labeldistance=0.4,
-           startangle=90, colors=color_list)
-    ax.legend(plot_line.index.values, loc=(0.9, 0.8), fontsize=8)
+
+    opts = {}
+    if autopct:
+        opts.update(autopct=lambda p: '%1.1f%%' % p if p >= 1 else "")
+    else:
+        opts.update(labeldistance=0.4)
+
+    ax.pie(plot_line, labels=plotting_labels, radius=1.2,
+           startangle=90, colors=color_list, **opts)
+    ax.axis('equal')
+    ax.legend(plot_line.index.values, loc=(0.9, 0.8))
 
 
 def plot_fix_point(table, ax, palette):

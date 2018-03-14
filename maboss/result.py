@@ -72,7 +72,7 @@ class Result(object):
         make_plot_trajectory(table, self._trajax, self.palette)
         return self._trajfig
 
-    def plot_piechart(self):
+    def plot_piechart(self, embed_labels=True, autopct=False):
         """Plot the states probability distribution of last time point."""
         if self._err:
             print("Error, plot_piechart cannot be called because MaBoSS"
@@ -80,7 +80,8 @@ class Result(object):
             return
         self._piefig, self._pieax = plt.subplots(1, 1)
         table = self.get_states_probtraj()
-        plot_piechart(table, self._pieax, self.palette)
+        plot_piechart(table, self._pieax, self.palette,
+                embed_labels=embed_labels, autopct=autopct)
 
     def plot_fixpoint(self):
         """Plot the probability distribution of fixed point."""
