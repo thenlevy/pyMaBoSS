@@ -200,8 +200,7 @@ class Network(dict):
         :type output_list: list of :py:class:`Node`
         """
         for nd in self:
-            if nd not in output_list:
-                self[nd].is_internal = True
+            self[nd].is_internal = nd not in output_list
 
 
 def _testStateDict(stDict, nbState):
