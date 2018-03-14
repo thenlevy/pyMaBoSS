@@ -57,7 +57,7 @@ def plot_piechart(plot_table, ax, palette, embed_labels=True, autopct=False):
     ax.pie(plot_line, labels=plotting_labels, radius=1.2,
            startangle=90, colors=color_list, **opts)
     ax.axis('equal')
-    ax.legend(plot_line.index.values, loc=(0.9, 0.8))
+    ax.legend(plot_line.index.values, loc=(0.9, 0.2))
 
 
 def plot_fix_point(table, ax, palette):
