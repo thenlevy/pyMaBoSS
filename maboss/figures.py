@@ -53,7 +53,8 @@ def plot_piechart(plot_table, ax, palette, embed_labels=True, autopct=False):
 
     opts = {}
     if autopct:
-        opts.update(autopct=lambda p: '%1.1f%%' % p if p >= 1 else "")
+        cutoff = autopct if type(autopct) is not bool else 1
+        opts.update(autopct=lambda p: '%1.1f%%' % p if p >= cutoff else "")
     else:
         opts.update(labeldistance=0.4)
 
