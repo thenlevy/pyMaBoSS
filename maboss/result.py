@@ -57,20 +57,15 @@ class Result(object):
         if self._err:
             print("Error, MaBoSS returned non 0 value", file=stderr)
 
-    def plot_trajectory(self):
+    def plot_trajectory(self, legend=True):
         """Plot the graph state probability vs time."""
         if self._err:
             print("Error, plot_trajectory cannot be called because MaBoSS"
                   "returned non 0 value", file=stderr)
             return
-        self._trajfig = self.make_trajectory()
-
-    def make_trajectory(self):
-        prefix = self._path+'/res'
-        self._trajfig, self._trajax = plt.subplots(1, 1)
         table = self.get_states_probtraj()
-        make_plot_trajectory(table, self._trajax, self.palette)
-        return self._trajfig
+        _, ax = plt.subplots(1,1)
+        make_plot_trajectory(table, ax, self.palette, legend=legend)
 
     def plot_piechart(self, embed_labels=True, autopct=False):
         """Plot the states probability distribution of last time point."""
@@ -193,6 +188,7 @@ def make_trajectory_table(df):
                 state = df[c][i]
                 time_table[state][tp] = df[prob_col][i]
 
+    time_table.sort_index(axis=1, inplace=True)
     return time_table
 
 

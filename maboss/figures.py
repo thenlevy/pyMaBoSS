@@ -1,43 +1,48 @@
 """Tools to draw figures from the MaBoSS results."""
 
+import operator
 
 import pandas as pd
 import matplotlib.pylab as plt
 import numpy as np
 
-def make_plot_trajectory(time_table, ax, palette):
-    color_list = []
-    for idx in time_table.index.values:
-        add_color(idx, color_list, palette)
+def persistent_color(palette, state):
+    if state in palette:
+        return palette[state]
+    color = "C%d" % ((len(palette) + 1) % 10)
+    palette[state] = color
+    return color
 
-    time_table.plot(ax=ax, color=color_list)
+def register_states_for_color(palette, collection):
+    [persistent_color(palette, state) for state in sorted(collection)]
 
-
-def make_trajectory(time_table, palette):
-    color_list = []
-    for idx in time_table.index.values:
-        add_color(idx, color_list, palette)
-    plot_table.plot(color=color_list)
-    plt.legend(loc='best')
-    plt.show()
+def make_plot_trajectory(time_table, ax, palette, legend=True):
+    register_states_for_color(palette, time_table.columns.values)
+    color_list = [persistent_color(palette, idx) \
+                    for idx in time_table.columns.values]
+    time_table.plot(ax=ax, color=color_list, legend=legend)
 
 
 def plot_node_prob(time_table, ax, palette):
     """Plot the probability of each node being up over time."""
-    color_list = []
-    for idx in time_table.index.values:
-        add_color(idx, color_list, palette)
+    register_states_for_color(palette, time_table.index.values)
+    color_list = [persistent_color(palette, idx) \
+                    for idx in time_table.index.values]
     time_table.plot(ax=ax, color=color_list)
 
 
 def plot_piechart(plot_table, ax, palette, embed_labels=True, autopct=False):
     plot_line = plot_table.iloc[-1].rename("")  # Takes the last time point
     plot_line = plot_line[plot_line > 0.01]
+    plot_line.sort_values(ascending=False, inplace=True)
+
+    register_states_for_color(palette, plot_line.index)
+
     plotting_labels = []
     color_list = []
     for value_index, value in enumerate(plot_line):
         state = plot_line.index.values[value_index]
-        add_color(state, color_list, palette)
+        color_list.append(persistent_color(palette, state))
         if embed_labels and value >= 0.1:
             plotting_labels.append(state)
         else:
@@ -65,27 +70,14 @@ def plot_fix_point(table, ax, palette):
         prob = table['Proba'][i]
         state = table['State'][i]
         prob_list.append(prob)
-        add_color(state, color_list, palette)
+        color_list.append(persistent_color(palette, state))
         labels.append('FP '+str(i+1))
     prob_ns = 1 - sum(prob_list)
     if prob_ns > 0.01:
         prob_list.append(prob_ns)
-        add_color('no_fp', color_list, palette)
+        color_list.append(persistent_color(palette, "no_fp"))
         labels.append('no_fp')
     ax.pie(prob_list, labels=labels, colors=color_list)
 
-
-
-
-    
-def add_color(state, color_list, palette):
-    """Add the color corresponding to state to color_list and update palette."""
-    if state in palette:
-        color_list.append(palette[state])
-    else:
-        n = (len(palette) + 1) % 10  # We cycle over 10 possible color_list
-        color = 'C' + str(n)
-        palette[state] = color
-        color_list.append(color)
 
 
