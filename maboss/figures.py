@@ -14,7 +14,7 @@ def persistent_color(palette, state):
     return color
 
 def register_states_for_color(palette, collection):
-    [persistent_color(palette, state) for state in sorted(collection)]
+    [persistent_color(palette, state) for state in collection]
 
 def make_plot_trajectory(time_table, ax, palette, legend=True):
     register_states_for_color(palette, time_table.columns.values)
