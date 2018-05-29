@@ -9,7 +9,10 @@ import numpy as np
 def persistent_color(palette, state):
     if state in palette:
         return palette[state]
-    color = "C%d" % ((len(palette) + 1) % 10)
+    if state == "Others":
+        color = "lightgray"
+    else:
+        color = "C%d" % ((len(palette) + 1) % 10)
     palette[state] = color
     return color
 
@@ -34,10 +37,17 @@ def plot_node_prob(time_table, ax, palette):
     plt.legend(loc='upper right')
 
 
-def plot_piechart(plot_table, ax, palette, embed_labels=True, autopct=False):
+def plot_piechart(plot_table, ax, palette, embed_labels=True, autopct=False, \
+                    prob_cutoff=0.01):
     plot_line = plot_table.iloc[-1].rename("")  # Takes the last time point
-    plot_line = plot_line[plot_line > 0.01]
+
+    others = plot_line[plot_line <= prob_cutoff].sum()
+
+    plot_line = plot_line[plot_line > prob_cutoff]
     plot_line.sort_values(ascending=False, inplace=True)
+
+    if others:
+        plot_line.at["Others"] = others
 
     register_states_for_color(palette, plot_line.index)
 
@@ -53,10 +63,13 @@ def plot_piechart(plot_table, ax, palette, embed_labels=True, autopct=False):
 
     opts = {}
     if autopct:
-        cutoff = autopct if type(autopct) is not bool else 1
+        cutoff = autopct if type(autopct) is not bool else 4
         opts.update(autopct=lambda p: '%1.1f%%' % p if p >= cutoff else "")
     else:
         opts.update(labeldistance=0.4)
+
+    if others:
+        plot_line = plot_line.rename({"Others": "Others (%1.2f%%)" % (others*100)})
 
     ax.pie(plot_line, labels=plotting_labels, radius=1.2,
            startangle=90, colors=color_list, **opts)
