@@ -53,7 +53,7 @@ booleanStr.setParseAction(lambda token: booleanStrAction(token[0]))
 numOrBool = (floatNum | booleanStr)("value")
 
 var_decl = pp.Group(externVar("lhs") + pp.Suppress('=')
-                    + numOrBool("rhs") + pp.Suppress(';'))
+                    + pp.SkipTo(';')("rhs") + pp.Suppress(';'))
 
 
 param_decl = pp.Group(varName("param") + pp.Suppress('=')
