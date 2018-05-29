@@ -57,13 +57,15 @@ class Result(object):
         if self._err:
             print("Error, MaBoSS returned non 0 value", file=stderr)
 
-    def plot_trajectory(self, legend=True):
+    def plot_trajectory(self, legend=True, until=None):
         """Plot the graph state probability vs time."""
         if self._err:
             print("Error, plot_trajectory cannot be called because MaBoSS"
                   "returned non 0 value", file=stderr)
             return
         table = self.get_states_probtraj()
+        if until:
+            table = table[table.index <= until]
         _, ax = plt.subplots(1,1)
         make_plot_trajectory(table, ax, self.palette, legend=legend)
 
@@ -88,7 +90,7 @@ class Result(object):
         self._fpfig, self._fpax = plt.subplots(1, 1)
         plot_fix_point(self.get_fptable(), self._fpax, self.palette)
 
-    def plot_node_trajectory(self):
+    def plot_node_trajectory(self, until=None):
         """Plot the probability of each node being up over time."""
         if self._err:
             print("Error maboss previously returned non 0 value",
@@ -96,6 +98,8 @@ class Result(object):
             return
         self._ndtraj, self._ndtrajax = plt.subplots(1, 1)
         table = self.get_nodes_probtraj()
+        if until:
+            table = table[table.index <= until]
         plot_node_prob(table, self._ndtrajax, self.palette)
 
     def get_fptable(self): 
