@@ -40,7 +40,7 @@ def plot_node_prob(time_table, ax, palette):
     plt.legend(loc='upper right')
 
 
-def plot_piechart(plot_table, ax, palette, embed_labels=True, autopct=False, \
+def plot_piechart(plot_table, ax, palette, embed_labels=False, autopct=4, \
                     prob_cutoff=0.01):
     plot_line = plot_table.iloc[-1].rename("")  # Takes the last time point
 

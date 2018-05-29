@@ -58,7 +58,11 @@ class Result(object):
             print("Error, MaBoSS returned non 0 value", file=stderr)
 
     def plot_trajectory(self, legend=True, until=None):
-        """Plot the graph state probability vs time."""
+        """Plot the graph state probability vs time.
+
+        :param float until: plot only up to time=`until`
+        :param bool legend: display legend
+        """
         if self._err:
             print("Error, plot_trajectory cannot be called because MaBoSS"
                   "returned non 0 value", file=stderr)
@@ -70,7 +74,16 @@ class Result(object):
         make_plot_trajectory(table, ax, self.palette, legend=legend)
 
     def plot_piechart(self, embed_labels=False, autopct=4, prob_cutoff=0.01):
-        """Plot the states probability distribution of last time point."""
+        """Plot the states probability distribution of last time point.
+
+        :param float prob_cutoff: states with a probability below this cut-off
+            are grouped as "Others"
+        :param bool embed_labels: if True, the labels are displayed within the
+            pie
+        :param autopct: display pourcentages greater than `autopct` within the
+            pie (defaults to 4 if it is a Boolean)
+        :type autopct: float or bool
+        """
         if self._err:
             print("Error, plot_piechart cannot be called because MaBoSS"
                   "returned non 0 value", file=stderr)
@@ -91,7 +104,10 @@ class Result(object):
         plot_fix_point(self.get_fptable(), self._fpax, self.palette)
 
     def plot_node_trajectory(self, until=None):
-        """Plot the probability of each node being up over time."""
+        """Plot the probability of each node being up over time.
+
+        :param float until: plot only up to time=`until`.
+        """
         if self._err:
             print("Error maboss previously returned non 0 value",
                   file=stderr)
