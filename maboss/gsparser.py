@@ -22,7 +22,7 @@ import uuid
 # ====================
 internal_var_decl = pp.Group(varName('lhs') + pp.Suppress('=')
                              + pp.SkipTo(';')('rhs') + pp.Suppress(';'))
-node_decl = pp.Group(pp.Suppress("Node") + varName("name") + pp.Suppress('{')
+node_decl = pp.Group(pp.Suppress(pp.CaselessKeyword("Node")) + varName("name") + pp.Suppress('{')
                      + pp.OneOrMore(internal_var_decl)('interns')
                      + pp.Suppress('}'))
 bnd_grammar = pp.OneOrMore(node_decl)
@@ -71,7 +71,7 @@ istate_decl = pp.Group(pp.Suppress('[') + pp.delimitedList(varName)("nodes")
                        + pp.delimitedList(stateProb)('attrib') + pp.Suppress(';'))
 
 oneIstate_decl = pp.Group(varName("nd_i") + ~pp.White() + pp.Suppress('.istate')
-                          + pp.Suppress('=') + pp.oneOf('0 1')('istate_val')
+                          + pp.Suppress('=') + booleanStr('istate_val')
                           + pp.Suppress(';'))
 
 internal_decl = pp.Group(varName("node") + ~pp.White()
