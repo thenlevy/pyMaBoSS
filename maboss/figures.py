@@ -12,7 +12,10 @@ def persistent_color(palette, state):
     if state == "Others":
         color = "lightgray"
     else:
-        color = "C%d" % ((len(palette) + 1) % 10)
+        count = len(palette)
+        if "Others" not in palette:
+            count += 1
+        color = "C%d" % (count % 10)
     palette[state] = color
     return color
 
