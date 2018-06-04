@@ -84,7 +84,10 @@ class Simulation(object):
 
     def copy(self):
         new_network = self.network.copy()
-        return Simulation(new_network, **(self.param), palette=self.palette)
+        result = Simulation(new_network, **(self.param), palette=self.palette)
+        if self.mutations:
+            result.mutations = self.mutations.copy()
+        return result
 
     def print_bnd(self, out=stdout):
         """Produce the content of the bnd file associated to the simulation."""
@@ -103,8 +106,8 @@ class Simulation(object):
             if p[0] != '$':
                 print(p + ' = ' + str(self.param[p]) + ';', file=out)
 
-        for nd in self.network.nodeList:
-            string = nd.name+'.is_internal = ' + str(int(nd.is_internal)) + ';'
+        for name in self.network.names:
+            string = name+'.is_internal = ' + str(int(self.network[name].is_internal)) + ';'
             print(string, file=out)
 
         for nd in self.refstate:
