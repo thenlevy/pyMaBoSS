@@ -86,7 +86,7 @@ class Node(object):
 
     def copy(self):
         return Node(self.name, self.logExp, self.rt_up, self.rt_down,
-                    self.is_internal, self.internal_var)
+                    self.is_internal, self.internal_var, self.is_mutant)
 
 
 class Network(dict):
@@ -101,7 +101,6 @@ class Network(dict):
 
     def __init__(self, nodeList):
         super().__init__({nd.name: nd for nd in nodeList})
-        self.nodeList = nodeList
         self.names = [nd.name for nd in nodeList]
         self.logicExp = {nd.name: nd.logExp for nd in nodeList}
 
@@ -118,9 +117,9 @@ class Network(dict):
         self._initState = {l: {0: 0.5, 1: 0.5} for l in self._attribution}
 
     def copy(self):
-        new_ndList = [nd.copy() for nd in self.nodeList]
+        new_ndList = [self[name].copy() for name in self.names]
         new_network = Network(new_ndList)
-        new_network._attribution = self._attribution
+        new_network._attribution = self._attribution.copy()
         new_network._initState = self._initState.copy()
         return new_network
 
@@ -213,11 +212,14 @@ def _testStateDict(stDict, nbState):
         print("Error, not all keys are good tuples of length %s" % nbState,
               file=stderr)
         return False
-    elif (not all(x >= 0 for x in stDict.values())
-          or not sum(stDict.values()) == 1):
-        print("Error, the given values must be nonegative and sum up to 1",
+    elif not all(x >= 0 for x in stDict.values()):
+        print("Error, the given values must be nonegative",
               file=stderr)
         return False
+    elif not sum(stDict.values()) == 1:
+        print("Warning: the given values should sum up to 1",
+              file=stderr)
+        return True
     else:
         return True
 
